@@ -1,0 +1,13 @@
+[project]
+name = "dwh-spark-processing"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ipykernel>=7.1.0",
+    "jupyter>=1.1.1",
+    "papermill>=2.6.0",
+    "pyarrow>=15.0.0,<16.0.0",
+    "pyspark==3.5.0",
+]
