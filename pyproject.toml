@@ -5,9 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "delta-spark==3.2.1",
     "ipykernel>=7.1.0",
     "jupyter>=1.1.1",
     "papermill>=2.6.0",
     "pyarrow>=15.0.0,<16.0.0",
-    "pyspark==3.5.0",
+    "pyiceberg>=0.7.0",
 ]
