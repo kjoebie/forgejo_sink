@@ -1,0 +1,40 @@
+{
+    "source": [
+        {
+            "name": "vizier",
+            "tables": {
+                "Relaties": 20251005022543449,
+                "Contactpersonen": 20251003104710244,
+                "Sleutels": 20251005010132827,
+                "Polissen": 20251005005410834,
+                "DnB": 20250328012143106,
+                "Contactmomenten": 20251005022543504,
+                "Taken": 20251005022547202,
+                "Sales": 20251003135526908,
+                "Retenties": 20251003111302415,
+                "Adresbeeld": null,
+                "UBO_Onderzoeken": 20250328181742849,
+                "Producten": 20231023160136424,
+                "Medewerkers": 20251005010119099,
+                "Klachten": 20251004150025955,
+                "Verkoopkansen": 20251003144320542,
+                "Interesses": 20251005022533031,
+                "Schades": 20251005000041028
+            }
+        },
+        {
+            "name": "ccs_level",
+            "tables": {
+                "Relaties": "1900-01-01T00:00:00",
+                "Contactpersonen": "1900-01-01T00:00:00"
+            }
+        },
+        {
+            "name": "anva_concern",
+            "tables": {
+                "Relaties": "1900-01-01T00:00:00",
+                "Contactpersonen": "1900-01-01T00:00:00"
+            }
+        }
+    ]
+}

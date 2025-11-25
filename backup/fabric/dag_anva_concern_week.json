@@ -1,0 +1,608 @@
+{
+    "source": "anva_concern",
+    "run_date_utc": null,
+    "watermarks_path": "config/watermarks.json",
+    "base_files": "greenhouse_sources",
+    "connection_name": "connection_anva_concern_prod",
+    "defaults": {
+        "concurrency_large": 2,
+        "concurrency_small": 8,
+        "max_rows_per_file_large": 15000000,
+        "max_rows_per_file_small": 1000000
+    },
+    "tables": [
+        {
+            "name": "Dim_Agent",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Agent",
+            "base_query": "SELECT [Agent_Id] AS [Agent_Id], [Agent_Naam] AS [Agent_Naam], [Agent] AS [Agent], [Straat] AS [Straat], CAST([Huisnummer] AS float) AS [Huisnummer], [Huisnummer_Toevoeging] AS [Huisnummer_Toevoeging], [Postcode] AS [Postcode], [Plaats] AS [Plaats], [Email] AS [Email], [Telefoonnummer] AS [Telefoonnummer], [SoortAgent] AS [SoortAgent], [Incassowijze] AS [Incassowijze], [Incassowijze_Pakket] AS [Incassowijze_Pakket], CAST([Is_AgentIncasso] AS bit) AS [Is_AgentIncasso], CAST([Is_Actief] AS bit) AS [Is_Actief] FROM [pbi].[Dim_Agent]"
+        },
+        {
+            "name": "Dim_Branche",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Branche",
+            "base_query": "SELECT [Branche_Id] AS [Branche_Id], [Branche_Omschrijving] AS [Branche_Omschrijving], [Branche] AS [Branche], [AFD_Branche] AS [AFD_Branche], [VerzekeringsSoort] AS [VerzekeringsSoort] FROM [pbi].[Dim_Branche]"
+        },
+        {
+            "name": "Dim_Calamiteit",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Calamiteit",
+            "base_query": "SELECT [Calamiteit_Id] AS [Calamiteit_Id], [Calamiteit_Omschrijving] AS [Calamiteit_Omschrijving], [Calamiteit] AS [Calamiteit] FROM [pbi].[Dim_Calamiteit]"
+        },
+        {
+            "name": "Dim_Collectiviteit",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Collectiviteit",
+            "base_query": "SELECT [Collectiviteit_Id] AS [Collectiviteit_Id], [Collectiviteit_Omschrijving] AS [Collectiviteit_Omschrijving], [Collectiviteit] AS [Collectiviteit], CAST([Is_Actief] AS bit) AS [Is_Actief] FROM [pbi].[Dim_Collectiviteit]"
+        },
+        {
+            "name": "Dim_DekkingCode",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_DekkingCode",
+            "base_query": "SELECT [DekkingCode_Id] AS [DekkingCode_Id], [Dekking_Omschrijving] AS [Dekking_Omschrijving], [Dekking] AS [Dekking], [DekkingSoort] AS [DekkingSoort], [AFD_Dekking] AS [AFD_Dekking], [ProvisieSoort] AS [ProvisieSoort], CAST([Is_Actief] AS bit) AS [Is_Actief], CAST([Is_ServiceDekking] AS bit) AS [Is_ServiceDekking], CAST([Is_AanAfmelden] AS bit) AS [Is_AanAfmelden], [AssurantieBelastingPercentage] AS [AssurantieBelastingPercentage] FROM [pbi].[Dim_DekkingCode]"
+        },
+        {
+            "name": "Dim_DekkingVariabel",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_DekkingVariabel",
+            "base_query": "SELECT [Dekking_Id] AS [Dekking_Id], [Index] AS [Index], [IndexCijfer] AS [IndexCijfer], CAST([Incassoprovisie % provinciaal] AS float) AS [Incassoprovisie_provinciaal] FROM [pbi].[Dim_DekkingVariabel]"
+        },
+        {
+            "name": "Dim_DetailMaatschappij",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_DetailMaatschappij",
+            "base_query": "SELECT [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], [DetailMaatschappij_Omschrijving] AS [DetailMaatschappij_Omschrijving], [DetailMaatschappij] AS [DetailMaatschappij], [POR_Code] AS [POR_Code], [WAM_code] AS [WAM_code], [MaatschappijSoort] AS [MaatschappijSoort], [MaatschappijType] AS [MaatschappijType], [Portefeuille] AS [Portefeuille], [Portefeuille_Indeling] AS [Portefeuille_Indeling], CAST([Is_Actief] AS bit) AS [Is_Actief], CAST([Is_ServiceMaatschappij] AS bit) AS [Is_ServiceMaatschappij], CAST([Is_AssurantiebelastingAfdrachtKantoor] AS bit) AS [Is_AssurantiebelastingAfdrachtKantoor] FROM [pbi].[Dim_DetailMaatschappij]"
+        },
+        {
+            "name": "Dim_FactuurSoort",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_FactuurSoort",
+            "base_query": "SELECT [FactuurSoort_Id] AS [FactuurSoort_Id], [FactuurSoort_Omschrijving] AS [FactuurSoort_Omschrijving], [FactuurSoort] AS [FactuurSoort], [FactuurGroep] AS [FactuurGroep] FROM [pbi].[Dim_FactuurSoort]"
+        },
+        {
+            "name": "Dim_HoofdBranche",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_HoofdBranche",
+            "base_query": "SELECT [HoofdBranche_Id] AS [HoofdBranche_Id], [HoofdBranche_Omschrijving] AS [HoofdBranche_Omschrijving], [HoofdBranche] AS [HoofdBranche] FROM [pbi].[Dim_HoofdBranche]"
+        },
+        {
+            "name": "Dim_Incassowijze",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Incassowijze",
+            "base_query": "SELECT [Incassowijze_Id] AS [Incassowijze_Id], [Incassowijze_Omschrijving] AS [Incassowijze_Omschrijving], [Incassowijze] AS [Incassowijze], CAST([Is_Actief] AS bit) AS [Is_Actief] FROM [pbi].[Dim_Incassowijze]"
+        },
+        {
+            "name": "Dim_Kantoor",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Kantoor",
+            "base_query": "SELECT [Kantoor_Id] AS [Kantoor_Id], [Kantoor_Naam] AS [Kantoor_Naam], [Kantoor] AS [Kantoor] FROM [pbi].[Dim_Kantoor]"
+        },
+        {
+            "name": "Dim_Maatschappij",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Maatschappij",
+            "base_query": "SELECT [Maatschappij_Id] AS [Maatschappij_Id], [Maatschappij_Naam] AS [Maatschappij_Naam], [Maatschappij] AS [Maatschappij], [POR_Code] AS [POR_Code], [WAM_Code] AS [WAM_Code], [MaatschappijSoort] AS [MaatschappijSoort], [MaatschappijType] AS [MaatschappijType], [Portefeuille] AS [Portefeuille], [Portefeuille_Indeling] AS [Portefeuille_Indeling], CAST([Is_Actief] AS bit) AS [Is_Actief], CAST([Is_Service_Maatschappij] AS bit) AS [Is_Service_Maatschappij], CAST([Is_AssurantiebelastingAfdrachtKantoor] AS bit) AS [Is_AssurantiebelastingAfdrachtKantoor], [Afdracht_Assurantiebelasting] AS [Afdracht_Assurantiebelasting] FROM [pbi].[Dim_Maatschappij]"
+        },
+        {
+            "name": "Dim_Medewerker",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Medewerker",
+            "base_query": "SELECT [Medewerker_Id] AS [Medewerker_Id], [Medewerker] AS [Medewerker], [Medewerker_Naam] AS [Medewerker_Naam], [Voorletters] AS [Voorletters], [Voorvoegsel] AS [Voorvoegsel], [Achternaam] AS [Achternaam], [Afdeling] AS [Afdeling], [Functie] AS [Functie], [IBAN] AS [IBAN], CAST([Is_Actief] AS bit) AS [Is_Actief] FROM [pbi].[Dim_Medewerker]"
+        },
+        {
+            "name": "Dim_MeldingRDW",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_MeldingRDW",
+            "base_query": "SELECT [MeldingRDW_Id] AS [MeldingRDW_Id], [MeldingRDW_Omschrijving] AS [MeldingRDW_Omschrijving], [MeldingRDW] AS [MeldingRDW] FROM [pbi].[Dim_MeldingRDW]"
+        },
+        {
+            "name": "Dim_PolisProducent",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_PolisProducent",
+            "base_query": "SELECT [PolisProducent_Id] AS [PolisProducent_Id], [PolisProducent_Naam] AS [PolisProducent_Naam], [PolisProducent] AS [PolisProducent] FROM [pbi].[Dim_PolisProducent]"
+        },
+        {
+            "name": "Dim_PolisVariabel",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_PolisVariabel",
+            "base_query": "SELECT [Polis_Id] AS [Polis_Id], [Postcode] AS [Postcode], [PC1] AS [PC1], [PC2] AS [PC2], [PC3] AS [PC3], [PC4] AS [PC4], [Huisnummer] AS [Huisnummer], [HuisnummerToevoeging] AS [HuisnummerToevoeging], [Land] AS [Land], CAST([Naverrekeningsjaar] AS int) AS [Naverrekeningsjaar], CAST([Is_SpecialLimit] AS bit) AS [Is_SpecialLimit], [SpecialLimitNummer] AS [SpecialLimitNummer], [Royementseden] AS [Royementseden], CAST([Naselectie_SignaalDatum] AS date) AS [Naselectie_SignaalDatum], CAST([Naselectie_Actiedatum] AS date) AS [Naselectie_Actiedatum], [Naselectie_Actie] AS [Naselectie_Actie], [Omschrijving] AS [Omschrijving], [Voorwaarden_1] AS [Voorwaarden_1], [Voorwaarden_2] AS [Voorwaarden_2], [Voorwaarden_3] AS [Voorwaarden_3], [Voorwaarden_4] AS [Voorwaarden_4], [Voorwaarden_5] AS [Voorwaarden_5], [Voorwaarden_6] AS [Voorwaarden_6], [Voorwaarden_7] AS [Voorwaarden_7], [Voorwaarden_8] AS [Voorwaarden_8], [Voorwaarden_9] AS [Voorwaarden_9], [Voorwaarden_10] AS [Voorwaarden_10], CAST([Is_EigenRisico_Afkoop] AS bit) AS [Is_EigenRisico_Afkoop], CAST([EigenRisico_Bedrag] AS decimal(15,2)) AS [EigenRisico_Bedrag], CAST([EigenRisico_Herstelketen] AS decimal(15,2)) AS [EigenRisico_Herstelketen], CAST([EigenRisico_Herstel_Autoruit] AS decimal(15,2)) AS [EigenRisico_Herstel_Autoruit], CAST([EigenRisico_Vervanging_Autoruit] AS decimal(15,2)) AS [EigenRisico_Vervanging_Autoruit], CAST([EigenRisico_WA] AS decimal(15,2)) AS [EigenRisico_WA], CAST([EigenRisico_Extra] AS decimal(15,2)) AS [EigenRisico_Extra], CAST([EigenRisico_Vrijwillig] AS decimal(15,2)) AS [EigenRisico_Vrijwillig], CAST([EigenRisico_Ruitvervanging] AS decimal(15,2)) AS [EigenRisico_Ruitvervanging], CAST([EigenRisico_TweedeSchade] AS decimal(15,2)) AS [EigenRisico_TweedeSchade], CAST([EigenRisico_Storm] AS decimal(15,2)) AS [EigenRisico_Storm], CAST([EigenRisico_Kinderen] AS decimal(15,2)) AS [EigenRisico_Kinderen], [WoonhuisType] AS [WoonhuisType], CAST([Is_Monument] AS int) AS [Is_Monument], [Bouwaard_Dak] AS [Bouwaard_Dak], [Bouwaard_Muren] AS [Bouwaard_Muren], [Bouwaard_Vloeren] AS [Bouwaard_Vloeren], CAST([OppervlakteWoning_m2] AS int) AS [OppervlakteWoning_m2], CAST([Bouwjaar] AS int) AS [Bouwjaar], [IVB_Code] AS [IVB_Code], [Voertuig_Merk] AS [Voertuig_Merk], [Voertuig_Model] AS [Voertuig_Model], [Voertuig_Type] AS [Voertuig_Type], [Voertuig_Gebruik] AS [Voertuig_Gebruik], CAST([Advieskosten] AS decimal(15,2)) AS [Advieskosten], CAST([AdvieskostenBTWVrij] AS decimal(15,2)) AS [AdvieskostenBTWVrij], CAST([AdvieskostenBTW] AS decimal(15,2)) AS [AdvieskostenBTW], CAST([Bemiddelingskosten] AS decimal(15,2)) AS [Bemiddelingskosten], CAST([BemiddelingskostenAssurrantiebelastingVrij] AS decimal(15,2)) AS [BemiddelingskostenAssurrantiebelastingVrij], CAST([AssurantieBelastingBemiddeling] AS decimal(15,2)) AS [AssurantieBelastingBemiddeling], CAST([Dagwaarde] AS decimal(15,2)) AS [Dagwaarde], CAST([UitkeringsTermijn] AS int) AS [UitkeringsTermijn], CAST([UIV_Compensatiebedrag] AS decimal(15,2)) AS [UIV_Compensatiebedrag], CAST([UIV_ResterendeJarenCompensatie] AS int) AS [UIV_ResterendeJarenCompensatie], CAST([ZuivereSchadeVrijeJaren] AS int) AS [ZuivereSchadeVrijeJaren], CAST([Laadvermogen] AS int) AS [Laadvermogen], CAST([Treingewicht] AS int) AS [Treingewicht], [MeldCode] AS [MeldCode], [LeaseFinancieringCode] AS [LeaseFinancieringCode], [RegelmatigeBestuurderBSN] AS [RegelmatigeBestuurderBSN], [RegelmatigeBestuurderRelatieMet] AS [RegelmatigeBestuurderRelatieMet], [AardBedrijf] AS [AardBedrijf], [Bestemming] AS [Bestemming], [UIV_Verzekeringsvorm] AS [UIV_Verzekeringsvorm], [UIV_Productverwijzing] AS [UIV_Productverwijzing], [RisicoAdres_Straat] AS [RisicoAdres_Straat], [RisicoAdres_Plaats] AS [RisicoAdres_Plaats], [Afdeling] AS [Afdeling] FROM [pbi].[Dim_PolisVariabel]"
+        },
+        {
+            "name": "Dim_PolisVariabel_VrijeLabels",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_PolisVariabel_VrijeLabels",
+            "base_query": "SELECT [Polis_Id] AS [Polis_Id], [Vrij_LabelTekst_1] AS [Vrij_LabelTekst_1], [Vrij_LabelTekst_2] AS [Vrij_LabelTekst_2], [Vrij_LabelTekst_3] AS [Vrij_LabelTekst_3], [Vrij_LabelTekst_4] AS [Vrij_LabelTekst_4], [Vrij_LabelTekst_5] AS [Vrij_LabelTekst_5], [Vrij_LabelTekst_6] AS [Vrij_LabelTekst_6], [Vrij_LabelTekst_7] AS [Vrij_LabelTekst_7], [Vrij_LabelTekst_8] AS [Vrij_LabelTekst_8], [Vrij_LabelTekst_9] AS [Vrij_LabelTekst_9], [Vrij_LabelTekst_10] AS [Vrij_LabelTekst_10], [Vrij_LabelTekst_11] AS [Vrij_LabelTekst_11], [Vrij_LabelTekst_12] AS [Vrij_LabelTekst_12], [Vrij_LabelTekst_13] AS [Vrij_LabelTekst_13], [Vrij_LabelTekst_14] AS [Vrij_LabelTekst_14], [Vrij_LabelTekst_15] AS [Vrij_LabelTekst_15], [Vrij_LabelTekst_16] AS [Vrij_LabelTekst_16], [Vrij_LabelTekst_17] AS [Vrij_LabelTekst_17], [Vrij_LabelTekst_18] AS [Vrij_LabelTekst_18], [Vrij_LabelTekst_19] AS [Vrij_LabelTekst_19], [Vrij_LabelTekst_20] AS [Vrij_LabelTekst_20], CAST([Vrij_LabelGetal_1] AS decimal(9,2)) AS [Vrij_LabelGetal_1], CAST([Vrij_LabelGetal_2] AS decimal(9,2)) AS [Vrij_LabelGetal_2], CAST([Vrij_LabelGetal_3] AS decimal(9,2)) AS [Vrij_LabelGetal_3], CAST([Vrij_LabelGetal_4] AS decimal(9,2)) AS [Vrij_LabelGetal_4], CAST([Vrij_LabelGetal_5] AS decimal(9,2)) AS [Vrij_LabelGetal_5], CAST([Vrij_LabelDatum_1] AS date) AS [Vrij_LabelDatum_1], CAST([Vrij_LabelDatum_2] AS date) AS [Vrij_LabelDatum_2], CAST([Vrij_LabelDatum_3] AS date) AS [Vrij_LabelDatum_3], CAST([Vrij_LabelDatum_4] AS date) AS [Vrij_LabelDatum_4], CAST([Vrij_LabelDatum_5] AS date) AS [Vrij_LabelDatum_5] FROM [pbi].[Dim_PolisVariabel_VrijeLabels]"
+        },
+        {
+            "name": "Dim_Polisvoorwaarden",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Polisvoorwaarden",
+            "base_query": "SELECT [Polis_Id] AS [Polis_Id], [Voorwaarden_1] AS [Voorwaarden_1], [Voorwaarden_2] AS [Voorwaarden_2], [Voorwaarden_3] AS [Voorwaarden_3], [Voorwaarden_4] AS [Voorwaarden_4], [Voorwaarden_5] AS [Voorwaarden_5], [Voorwaarden_6] AS [Voorwaarden_6], [Voorwaarden_7] AS [Voorwaarden_7], [Voorwaarden_8] AS [Voorwaarden_8], [Voorwaarden_9] AS [Voorwaarden_9], [Voorwaarden_10] AS [Voorwaarden_10] FROM [pbi].[Dim_Polisvoorwaarden]"
+        },
+        {
+            "name": "Dim_Relatie",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Relatie",
+            "base_query": "SELECT CAST([Relatie_Id] AS int) AS [Relatie_Id], [Hoofdrelatie_Id] AS [Hoofdrelatie_Id], [Hoofdrelatie] AS [Hoofdrelatie], [HoofdrelatieNaam] AS [HoofdrelatieNaam], CAST([Is_Hoofdrelatie] AS bit) AS [Is_Hoofdrelatie], [Kantoor_Id] AS [Kantoor_Id], [Relatie] AS [Relatie], [RelatieSoort_Id] AS [RelatieSoort_Id], CAST([Is_RCRelatie] AS bit) AS [Is_RCRelatie], [RelatieProducent_Id] AS [RelatieProducent_Id], [Agent] AS [Agent], [NaamSamengesteld] AS [NaamSamengesteld], [RelatieNaam] AS [RelatieNaam], [Voorletters] AS [Voorletters], [Voorvoegsels] AS [Voorvoegsels], [Email] AS [Email], [Straat] AS [Straat], [HuisnummerToevoeging] AS [HuisnummerToevoeging], [Postcode] AS [Postcode], CAST([Huisnummer] AS float) AS [Huisnummer], [Plaats] AS [Plaats], [Land] AS [Land], [PC1] AS [PC1], [PC2] AS [PC2], [PC3] AS [PC3], [PC4] AS [PC4], CAST([Introductie_Datum] AS date) AS [Introductie_Datum], CAST([Is_Vervallen] AS bit) AS [Is_Vervallen], CAST([Is_FoutiefActief] AS bit) AS [Is_FoutiefActief], CAST([Is_VerwijzendeRelatieAanwezig] AS bit) AS [Is_VerwijzendeRelatieAanwezig], CAST([LaatsteWijzigings_Datum] AS date) AS [LaatsteWijzigings_Datum], CAST([Royements_Datum] AS date) AS [Royements_Datum], CAST([RelatieduurInMaanden] AS int) AS [RelatieduurInMaanden], [Belang] AS [Belang], [Relatiebeheerder] AS [Relatiebeheerder], [HerkomstRelatie] AS [HerkomstRelatie], [Zoeksleutel] AS [Zoeksleutel], [Incassowijze_Id] AS [Incassowijze_Id], [IBAN_Bank] AS [IBAN_Bank], [IBAN_Giro] AS [IBAN_Giro] FROM [pbi].[Dim_Relatie]"
+        },
+        {
+            "name": "Dim_RelatieProducent",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_RelatieProducent",
+            "base_query": "SELECT [RelatieProducent_Id] AS [RelatieProducent_Id], [RelatieProducent_Naam] AS [RelatieProducent_Naam], [RelatieProducent] AS [RelatieProducent] FROM [pbi].[Dim_RelatieProducent]"
+        },
+        {
+            "name": "Dim_RelatieSoort",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_RelatieSoort",
+            "base_query": "SELECT [RelatieSoort_Id] AS [RelatieSoort_Id], [RelatieSoort_Omschrijving] AS [RelatieSoort_Omschrijving], [RelatieSoort] AS [RelatieSoort], [Segment] AS [Segment] FROM [pbi].[Dim_RelatieSoort]"
+        },
+        {
+            "name": "Dim_RelatieVariabel",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_RelatieVariabel",
+            "base_query": "SELECT CAST([Relatie_Id] AS int) AS [Relatie_Id], [RedenNietAanmalen] AS [RedenNietAanmalen], CAST([Is_OnlinePolisMap] AS bit) AS [Is_OnlinePolisMap], CAST([Is_Email_Polisblad] AS bit) AS [Is_Email_Polisblad], CAST([Is_Email_VerzendBewijs] AS bit) AS [Is_Email_VerzendBewijs], CAST([Is_Email_Factuur] AS bit) AS [Is_Email_Factuur], CAST([Is_Email_Brief] AS bit) AS [Is_Email_Brief], CAST([Is_Email_Schadebrief] AS bit) AS [Is_Email_Schadebrief], CAST([RC_Termijnbedrag] AS decimal(15,2)) AS [RC_Termijnbedrag], [RC_Termijnfrequentie] AS [RC_Termijnfrequentie], [RC_EerstKomendeBetaaldatum] AS [RC_EerstKomendeBetaaldatum], [RC_FrequentieOverzicht] AS [RC_FrequentieOverzicht], [RC_EerstKomendeOverzicht] AS [RC_EerstKomendeOverzicht], [RC_Eindafrekening] AS [RC_Eindafrekening], [SBI_Id] AS [SBI_Id], [KVK_nummer] AS [KVK_nummer], [Geslacht] AS [Geslacht], CAST([Geboortedatum] AS date) AS [Geboortedatum], CAST([Leeftijd] AS int) AS [Leeftijd], [Rechtsvorm] AS [Rechtsvorm], CAST([LaatsteBezoek_Datum] AS date) AS [LaatsteBezoek_Datum], CAST([LaatsteBezoek_Datum_L2200] AS date) AS [LaatsteBezoek_Datum_L2200], [Nationaliteit] AS [Nationaliteit], [Postcode_Buitenland] AS [Postcode_Buitenland], [GroepLeeftijd] AS [GroepLeeftijd], [Segmentatie_Code] AS [Segmentatie_Code], CAST([Is_Email_VerzekeringsBewijs] AS bit) AS [Is_Email_VerzekeringsBewijs], [Afdeling_Relatie] AS [Afdeling_Relatie] FROM [pbi].[Dim_RelatieVariabel]"
+        },
+        {
+            "name": "Dim_RelatieVariabel_VrijeLabels",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_RelatieVariabel_VrijeLabels",
+            "base_query": "SELECT [Relatie_Id] AS [Relatie_Id], [Vrij_LabelTekst_1] AS [Vrij_LabelTekst_1], [Vrij_LabelTekst_2] AS [Vrij_LabelTekst_2], [Vrij_LabelTekst_3] AS [Vrij_LabelTekst_3], [Vrij_LabelTekst_4] AS [Vrij_LabelTekst_4], [Vrij_LabelTekst_5] AS [Vrij_LabelTekst_5], [Vrij_LabelTekst_6] AS [Vrij_LabelTekst_6], [Vrij_LabelTekst_7] AS [Vrij_LabelTekst_7], [Vrij_LabelTekst_8] AS [Vrij_LabelTekst_8], [Vrij_LabelTekst_9] AS [Vrij_LabelTekst_9], [Vrij_LabelTekst_10] AS [Vrij_LabelTekst_10], [Vrij_LabelTekst_11] AS [Vrij_LabelTekst_11], [Vrij_LabelTekst_12] AS [Vrij_LabelTekst_12], [Vrij_LabelTekst_13] AS [Vrij_LabelTekst_13], [Vrij_LabelTekst_14] AS [Vrij_LabelTekst_14], [Vrij_LabelTekst_15] AS [Vrij_LabelTekst_15], [Vrij_LabelTekst_16] AS [Vrij_LabelTekst_16], [Vrij_LabelTekst_17] AS [Vrij_LabelTekst_17], [Vrij_LabelTekst_18] AS [Vrij_LabelTekst_18], [Vrij_LabelTekst_19] AS [Vrij_LabelTekst_19], [Vrij_LabelTekst_20] AS [Vrij_LabelTekst_20], CAST([Vrij_LabelGetal_1] AS decimal(9,2)) AS [Vrij_LabelGetal_1], CAST([Vrij_LabelGetal_2] AS decimal(9,2)) AS [Vrij_LabelGetal_2], CAST([Vrij_LabelGetal_3] AS decimal(9,2)) AS [Vrij_LabelGetal_3], CAST([Vrij_LabelGetal_4] AS decimal(9,2)) AS [Vrij_LabelGetal_4], CAST([Vrij_LabelGetal_5] AS decimal(9,2)) AS [Vrij_LabelGetal_5], CAST([Vrij_LabelDatum_1] AS date) AS [Vrij_LabelDatum_1], CAST([Vrij_LabelDatum_2] AS date) AS [Vrij_LabelDatum_2], CAST([Vrij_LabelDatum_3] AS date) AS [Vrij_LabelDatum_3], CAST([Vrij_LabelDatum_4] AS date) AS [Vrij_LabelDatum_4], CAST([Vrij_LabelDatum_5] AS date) AS [Vrij_LabelDatum_5] FROM [pbi].[Dim_RelatieVariabel_VrijeLabels]"
+        },
+        {
+            "name": "Dim_SBICode",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_SBICode",
+            "base_query": "SELECT [SBI_Id] AS [SBI_Id], [SBI_Omschrijving] AS [SBI_Omschrijving], [SBI] AS [SBI] FROM [pbi].[Dim_SBICode]"
+        },
+        {
+            "name": "Dim_Schade",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Schade",
+            "base_query": "SELECT [Schade_Id] AS [Schade_Id], CAST([Schadenummer] AS int) AS [Schadenummer], CAST([SchadeSubnummer] AS int) AS [SchadeSubnummer], [SchadeSoort_Id] AS [SchadeSoort_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Polis_Id] AS [Polis_Id], [Polisnummer] AS [Polisnummer], [Maatschappij_Id] AS [Maatschappij_Id], [Kantoor_Id] AS [Kantoor_Id], [Behandelaar_Id] AS [Behandelaar_Id], [Agent_Id] AS [Agent_Id], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [Collectiviteit_Id] AS [Collectiviteit_Id], [Calamiteit_Id] AS [Calamiteit_Id], [DirecteSchadeAfhandelSoort_Id] AS [DirecteSchadeAfhandelSoort_Id], CAST([Is_Verwijderbaar] AS bit) AS [Is_Verwijderbaar], CAST([Is_SchuldSchade] AS bit) AS [Is_SchuldSchade], CAST([Is_LetselSchade] AS bit) AS [Is_LetselSchade], CAST([Is_Terugval] AS bit) AS [Is_Terugval], CAST([Is_Afgehandeld] AS bit) AS [Is_Afgehandeld], CAST([Is_OpenstaandeAgendaAanwezig] AS bit) AS [Is_OpenstaandeAgendaAanwezig], CAST([Is_SchadeZonderReserve] AS bit) AS [Is_SchadeZonderReserve], CAST([Is_BetalingOpAfgehandeldeSchadeAanwezig] AS bit) AS [Is_BetalingOpAfgehandeldeSchadeAanwezig], CAST([Is_SchadeInBuitenland] AS bit) AS [Is_SchadeInBuitenland], CAST([Schade_Datum] AS date) AS [Schade_Datum], CONVERT(varchar(8), [Schade_Tijd], 108) AS [Schade_Tijd], CAST([Meld_Datum] AS date) AS [Meld_Datum], CAST([Tekenjaar] AS int) AS [Tekenjaar], [Schadelocatie] AS [Schadelocatie], CAST([Afhandel_Datum] AS date) AS [Afhandel_Datum], CAST([Doorlooptijd] AS int) AS [Doorlooptijd], CAST([Schadelast] AS decimal(38,2)) AS [Schadelast], CAST([Reserve] AS decimal(38,2)) AS [Reserve], [Dossier] AS [Dossier], [CIS_Koppeling] AS [CIS_Koppeling], CAST([CIS_Koppeling_Datum] AS date) AS [CIS_Koppeling_Datum], [CIS_Branche] AS [CIS_Branche], [CIS_Oorzaak] AS [CIS_Oorzaak], [Kenteken] AS [Kenteken], [TotaleSchadelastgroep] AS [TotaleSchadelastgroep], [EMS_Schadenummer] AS [EMS_Schadenummer], [Melder] AS [Melder], [Afhandelaar] AS [Afhandelaar], CAST([Dossierdatum] AS date) AS [Dossierdatum], CAST([Is_InclBTW] AS bit) AS [Is_InclBTW], [Verzekeringsvorm_Id] AS [Verzekeringsvorm_Id] FROM [pbi].[Dim_Schade]"
+        },
+        {
+            "name": "Dim_SchadeCode",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_SchadeCode",
+            "base_query": "SELECT [SchadeCode_Id] AS [SchadeCode_Id], [SchadeCode_Omschrijving] AS [SchadeCode_Omschrijving], [SchadeCode] AS [SchadeCode] FROM [pbi].[Dim_SchadeCode]"
+        },
+        {
+            "name": "Dim_SchadeSoort",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_SchadeSoort",
+            "base_query": "SELECT [SchadeSoort_Id] AS [SchadeSoort_Id], [SchadeSoort_Omschrijving] AS [SchadeSoort_Omschrijving], [SchadeSoort] AS [SchadeSoort] FROM [pbi].[Dim_SchadeSoort]"
+        },
+        {
+            "name": "Dim_Tekenjaar",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Tekenjaar",
+            "base_query": "SELECT CAST([Tekenjaar] AS int) AS [Tekenjaar] FROM [pbi].[Dim_Tekenjaar]"
+        },
+        {
+            "name": "Dim_Verzekeringsvorm",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Verzekeringsvorm",
+            "base_query": "SELECT [Verzekeringsvorm_Id] AS [Verzekeringsvorm_Id], [Verzekeringsvorm_Omschrijving] AS [Verzekeringsvorm_Omschrijving], [Verzekeringsvorm] AS [Verzekeringsvorm] FROM [pbi].[Dim_Verzekeringsvorm]"
+        },
+        {
+            "name": "Dim_Wijzigingsreden",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Dim_Wijzigingsreden",
+            "base_query": "SELECT [Wijzigingsreden_Id] AS [Wijzigingsreden_Id], [Wijzigingsreden_Omschrijving] AS [Wijzigingsreden_Omschrijving], [Wijzigingsreden] AS [Wijzigingsreden], [Status] AS [Status] FROM [pbi].[Dim_Wijzigingsreden]"
+        },
+        {
+            "name": "Fact_Agenda",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Agenda",
+            "base_query": "SELECT [Medewerker_Id] AS [Medewerker_Id], [Kantoor_Id] AS [Kantoor_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Polis_Id] AS [Polis_Id], CAST([Schadenummer] AS int) AS [Schadenummer], [Reden] AS [Reden], CAST([Is_Afgehandeld] AS bit) AS [Is_Afgehandeld], [AgendaSoort] AS [AgendaSoort], CAST([Taak_Datum] AS date) AS [Taak_Datum], CAST([Aanmaak_Datum] AS date) AS [Aanmaak_Datum], CAST([Uitvoer_Datum] AS date) AS [Uitvoer_Datum], CAST([Doorlooptijd] AS int) AS [Doorlooptijd], [Polisnummer] AS [Polisnummer] FROM [pbi].[Fact_Agenda]"
+        },
+        {
+            "name": "Fact_Agent_Borderel",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Agent_Borderel",
+            "base_query": "SELECT [Polisnummer] AS [Polisnummer], [Relatie_Id] AS [Relatie_Id], [Branche_Id] AS [Branche_Id], CAST([Verval_Datum] AS date) AS [Verval_Datum], CAST([Termijn] AS float) AS [Termijn], [Incassowijze_Id] AS [Incassowijze_Id], CAST([BonusMalusPercentage] AS float) AS [BonusMalusPercentage], [Kenteken] AS [Kenteken], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([Premie] AS float) AS [Premie], CAST([Provisie] AS float) AS [Provisie], CAST([Kosten] AS float) AS [Kosten], CAST([Agentkosten] AS float) AS [Agentkosten], CAST([Korting_Toeslag] AS float) AS [Korting_Toeslag], CAST([Assurantiebelasting] AS float) AS [Assurantiebelasting], CAST([IncassoBedrag] AS float) AS [IncassoBedrag], CAST([NettoAgent] AS float) AS [NettoAgent], [Agent_Id] AS [Agent_Id], [FactuurSoort_Id] AS [FactuurSoort_Id], CAST([SchadeWABedrag] AS float) AS [SchadeWABedrag], CAST([SchadeCascoBedrag] AS float) AS [SchadeCascoBedrag], CAST([SchadeKostenRelatie] AS float) AS [SchadeKostenRelatie], CAST([Schade_KostenMaatschappij] AS float) AS [Schade_KostenMaatschappij], CAST([SchadeAfmCourtBedrag] AS float) AS [SchadeAfmCourtBedrag], CAST([SchadeEigenRisico] AS float) AS [SchadeEigenRisico], CAST([SchadeEigenRisicoWA] AS float) AS [SchadeEigenRisicoWA], [PakketPolisnummer] AS [PakketPolisnummer], [Maatschappij_Id] AS [Maatschappij_Id], CAST([TussenpersoonKosten] AS float) AS [TussenpersoonKosten], CAST([MaatschappijKosten] AS float) AS [MaatschappijKosten] FROM [pbi].[Fact_Agent_Borderel]"
+        },
+        {
+            "name": "Fact_Agent_RekeningCourant",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Agent_RekeningCourant",
+            "base_query": "SELECT [Kantoor_Id] AS [Kantoor_Id], [KantoorNaam] AS [KantoorNaam], [Agent_Id] AS [Agent_Id], CAST([Jaar] AS int) AS [Jaar], CAST([Maand] AS int) AS [Maand], CAST([Saldo_Datum] AS date) AS [Saldo_Datum], CAST([Saldo] AS float) AS [Saldo], CAST([Prolongatie] AS float) AS [Prolongatie], CAST([EenmaligeBoeking] AS float) AS [EenmaligeBoeking], CAST([Schade] AS float) AS [Schade], CAST([Overig] AS float) AS [Overig], CAST([Remise] AS float) AS [Remise], CAST([Correctie] AS float) AS [Correctie] FROM [pbi].[Fact_Agent_RekeningCourant]"
+        },
+        {
+            "name": "Fact_Agent_RekeningCourantDetail",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Agent_RekeningCourantDetail",
+            "base_query": "SELECT [Kantoor_Id] AS [Kantoor_Id], [KantoorNaam] AS [KantoorNaam], [Agent_Id] AS [Agent_Id], CAST([Saldo_Datum] AS date) AS [Saldo_Datum], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([RekeningCourant_Periode] AS date) AS [RekeningCourant_Periode], [Polisnummer] AS [Polisnummer], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Volgnummer] AS [Volgnummer], [VolgnummerSub] AS [VolgnummerSub], [OmschrijvingBoeking] AS [OmschrijvingBoeking], [Branche_Id] AS [Branche_Id], CAST([Verval_Datum] AS date) AS [Verval_Datum], CAST([Netto] AS float) AS [Netto], CAST([Incasso] AS float) AS [Incasso], CAST([BrutoPremie] AS float) AS [BrutoPremie], CAST([NoClaim] AS float) AS [NoClaim], CAST([Mijkosten] AS float) AS [Mijkosten], CAST([TussenPersoonKosten] AS float) AS [TussenPersoonKosten], CAST([Assurantiebelasting] AS float) AS [Assurantiebelasting], CAST([TermijnToeslag] AS float) AS [TermijnToeslag], CAST([Provisie] AS float) AS [Provisie], CAST([Afsluitprovisie] AS float) AS [Afsluitprovisie], CAST([Volmachtbeloning] AS float) AS [Volmachtbeloning], CAST([Agentprovisie] AS float) AS [Agentprovisie], CAST([Agentkosten] AS float) AS [Agentkosten], CAST([KostenRelatie] AS float) AS [KostenRelatie], CAST([KostenMaatschappij] AS float) AS [KostenMaatschappij], CAST([Schadenummer] AS float) AS [Schadenummer], CAST([SchadebedragCasco] AS float) AS [SchadebedragCasco], CAST([SchadebedragWA] AS float) AS [SchadebedragWA], CAST([Factuurnummer] AS float) AS [Factuurnummer], [FactuurSoort] AS [FactuurSoort] FROM [pbi].[Fact_Agent_RekeningCourantDetail]"
+        },
+        {
+            "name": "Fact_Betalingen",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Betalingen",
+            "base_query": "SELECT CAST([Factuurnummer] AS int) AS [Factuurnummer], CAST([Relatie_Id] AS int) AS [Relatie_Id], CAST([Betaald_Datum] AS date) AS [Betaald_Datum], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([Afhandel_Datum] AS date) AS [Afhandel_Datum], CAST([Schade_Datum] AS date) AS [Schade_Datum], [Medewerker_Id] AS [Medewerker_Id], [Maatschappij_Id] AS [Maatschappij_Id], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [SchadeSoort_Id] AS [SchadeSoort_Id], CAST([Bedrag] AS float) AS [Bedrag], CAST([Banknummer] AS float) AS [Banknummer], [IBAN] AS [IBAN], [Schade_Id] AS [Schade_Id], [Begunstigde] AS [Begunstigde], [Entiteit] AS [Entiteit], CAST([Is_IBAN_Medewerker] AS bit) AS [Is_IBAN_Medewerker], [SoortBoeking] AS [SoortBoeking], [SoortBetrokkene] AS [SoortBetrokkene], [Agent_Id] AS [Agent_Id], [Incassowijze_Id] AS [Incassowijze_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [Afboekwijze_Id] AS [Afboekwijze_Id], CAST([Boekstuknummer] AS int) AS [Boekstuknummer], CAST([Factuur_Datum] AS date) AS [Factuur_Datum] FROM [pbi].[Fact_Betalingen]"
+        },
+        {
+            "name": "Fact_Cashbroker",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Cashbroker",
+            "base_query": "SELECT [Agent_Id] AS [Agent_Id], [AgentNaam] AS [AgentNaam], [Agent] AS [Agent], [PolisProducent_Id] AS [PolisProducent_Id], [PolisProducentNaam] AS [PolisProducentNaam], [PolisProducent] AS [PolisProducent], [Relatie_Id] AS [Relatie_Id], [RelatieNaam] AS [RelatieNaam], [Relatie] AS [Relatie], [Factuurnummer] AS [Factuurnummer], [Polisnummer] AS [Polisnummer], [Polis_Id] AS [Polis_Id], [BoekingsSoort] AS [BoekingsSoort], [Maatschappij_Id] AS [Maatschappij_Id], [Branche_Id] AS [Branche_Id], [Branche_Omschrijving] AS [Branche_Omschrijving], [DekkingCode_Id] AS [DekkingCode_Id], [Dekking_Omschrijving] AS [Dekking_Omschrijving], CAST([NettoPremie] AS float) AS [NettoPremie], CAST([IncassoBedrag] AS float) AS [IncassoBedrag], CAST([AgentProvisie] AS float) AS [AgentProvisie], CAST([Afboek_Datum] AS date) AS [Afboek_Datum], CAST([Betaal_Datum] AS date) AS [Betaal_Datum], [BetaalWijze] AS [BetaalWijze], CAST([BetaaldBedrag] AS float) AS [BetaaldBedrag], CAST([TotaalBetaald] AS float) AS [TotaalBetaald], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([Factuur_Datum] AS date) AS [Factuur_Datum] FROM [pbi].[Fact_Cashbroker]"
+        },
+        {
+            "name": "Fact_Dekking",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Dekking",
+            "base_query": "SELECT [DekkingCode_Id] AS [DekkingCode_Id], [Dekking_Id] AS [Dekking_Id], CAST([VolgnummerDekking] AS int) AS [VolgnummerDekking], [Polis_Id] AS [Polis_Id], [TariefSoort] AS [TariefSoort], CAST([Tarief_Datum] AS date) AS [Tarief_Datum], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([ToeslagPercentage] AS float) AS [ToeslagPercentage], CAST([MaatschappijKosten] AS float) AS [MaatschappijKosten], CAST([CollectiviteitKortingPercentage] AS decimal(19,2)) AS [CollectiviteitKortingPercentage], [TermijnToeslagTabel] AS [TermijnToeslagTabel], CAST([PremieBruto_Jaar] AS decimal(15,2)) AS [PremieBruto_Jaar], CAST([PremieNetto_Jaar] AS decimal(15,2)) AS [PremieNetto_Jaar], CAST([IncassoBedrag_Jaar] AS decimal(15,2)) AS [IncassoBedrag_Jaar], CAST([IncassoProvisie_Jaar] AS decimal(15,2)) AS [IncassoProvisie_Jaar], CAST([AfsluitProvisie_Jaar] AS decimal(15,2)) AS [AfsluitProvisie_Jaar], CAST([BonusProvisie_Jaar] AS decimal(15,2)) AS [BonusProvisie_Jaar], CAST([AgentProvisie_Jaar] AS decimal(15,2)) AS [AgentProvisie_Jaar], CAST([VolmachtBeloning_Jaar] AS decimal(15,2)) AS [VolmachtBeloning_Jaar], CAST([Retourprovisie_Jaar] AS decimal(15,2)) AS [Retourprovisie_Jaar], CAST([ToeslagBedrag_Jaar] AS decimal(15,2)) AS [ToeslagBedrag_Jaar], CAST([AssurantieBelasting_Jaar] AS decimal(15,2)) AS [AssurantieBelasting_Jaar], CAST([BonusMalusBedrag_Jaar] AS decimal(15,2)) AS [BonusMalusBedrag_Jaar], CAST([CollectiviteitKorting_Jaar] AS decimal(15,2)) AS [CollectiviteitKorting_Jaar], CAST([PakketKorting_Jaar] AS decimal(15,2)) AS [PakketKorting_Jaar], CAST([PremieNettoVoorPakketKorting_Jaar] AS decimal(15,2)) AS [PremieNettoVoorPakketKorting_Jaar], CAST([ToeslagBedragTotaal_Jaar] AS decimal(15,2)) AS [ToeslagBedragTotaal_Jaar], CAST([AdviesKosten_Jaar] AS decimal(15,2)) AS [AdviesKosten_Jaar], CAST([AdviesKostenVrijVanBTW_Jaar] AS decimal(15,2)) AS [AdviesKostenVrijVanBTW_Jaar], CAST([BemiddelingsKosten_Jaar] AS decimal(15,2)) AS [BemiddelingsKosten_Jaar], CAST([BemiddelingsKostenVrijVanAssurantieBelasting_Jaar] AS decimal(15,2)) AS [BemiddelingsKostenVrijVanAssurantieBelasting_Jaar], CAST([BTWOverAdviesKosten_Jaar] AS decimal(15,2)) AS [BTWOverAdviesKosten_Jaar], CAST([AssurantieBelastingOverBemiddelingsKosten_Jaar] AS decimal(15,2)) AS [AssurantieBelastingOverBemiddelingsKosten_Jaar], CAST([TermijnToeslagBedrag_Jaar] AS decimal(15,2)) AS [TermijnToeslagBedrag_Jaar], CAST([UIV_CompensatieBedrag_Jaar] AS decimal(15,2)) AS [UIV_CompensatieBedrag_Jaar], CAST([Promillage] AS decimal(10,5)) AS [Promillage], CAST([TotaleKorting_Jaar] AS decimal(19,2)) AS [TotaleKorting_Jaar], CAST([TotaleKortingPercentage] AS decimal(19,2)) AS [TotaleKortingPercentage] FROM [pbi].[Fact_Dekking]"
+        },
+        {
+            "name": "Fact_Dekking_Detail",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Dekking_Detail",
+            "base_query": "SELECT [Polis_Id] AS [Polis_Id], [Dekking_Id] AS [Dekking_Id], [DekkingCode_Id] AS [DekkingCode_Id], CAST([VolgnummerDekking] AS int) AS [VolgnummerDekking], [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], CAST([Percentage_Aandeel] AS float) AS [Percentage_Aandeel], [TariefSoort] AS [TariefSoort], CAST([Tarief_Datum] AS date) AS [Tarief_Datum], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([ToeslagPercentage] AS float) AS [ToeslagPercentage], CAST([CollectiviteitKortingPercentage] AS decimal(19,2)) AS [CollectiviteitKortingPercentage], CAST([MaatschappijKosten] AS float) AS [MaatschappijKosten], [TermijnToeslagTabel] AS [TermijnToeslagTabel], CAST([PremieBruto_Jaar] AS float) AS [PremieBruto_Jaar], CAST([PremieNetto_Jaar] AS float) AS [PremieNetto_Jaar], CAST([IncassoBedrag_Jaar] AS float) AS [IncassoBedrag_Jaar], CAST([IncassoProvisie_Jaar] AS float) AS [IncassoProvisie_Jaar], CAST([AfsluitProvisie_Jaar] AS float) AS [AfsluitProvisie_Jaar], CAST([BonusProvisie_Jaar] AS float) AS [BonusProvisie_Jaar], CAST([AgentProvisie_Jaar] AS float) AS [AgentProvisie_Jaar], CAST([VolmachtBeloning_Jaar] AS float) AS [VolmachtBeloning_Jaar], CAST([Retourprovisie_Jaar] AS float) AS [Retourprovisie_Jaar], CAST([ToeslagBedrag_Jaar] AS float) AS [ToeslagBedrag_Jaar], CAST([BonusMalusBedrag_Jaar] AS float) AS [BonusMalusBedrag_Jaar], CAST([CollectiviteitKorting_Jaar] AS float) AS [CollectiviteitKorting_Jaar], CAST([PakketKorting_Jaar] AS float) AS [PakketKorting_Jaar], CAST([PremieNettoVoorPakketKorting_Jaar] AS float) AS [PremieNettoVoorPakketKorting_Jaar], CAST([ToeslagBedragTotaal_Jaar] AS float) AS [ToeslagBedragTotaal_Jaar], CAST([AdviesKosten_Jaar] AS float) AS [AdviesKosten_Jaar], CAST([AdviesKostenVrijVanBTW_Jaar] AS float) AS [AdviesKostenVrijVanBTW_Jaar], CAST([BemiddelingsKosten_Jaar] AS float) AS [BemiddelingsKosten_Jaar], CAST([BemiddelingsKostenVrijVanAssurantieBelasting_Jaar] AS float) AS [BemiddelingsKostenVrijVanAssurantieBelasting_Jaar], CAST([BTWOverAdviesKosten_Jaar] AS float) AS [BTWOverAdviesKosten_Jaar], CAST([AssurantieBelastingOverBemiddelingsKosten_Jaar] AS float) AS [AssurantieBelastingOverBemiddelingsKosten_Jaar], CAST([AssurantieBelasting_Jaar] AS float) AS [AssurantieBelasting_Jaar], CAST([TermijnToeslagBedrag_Jaar] AS float) AS [TermijnToeslagBedrag_Jaar], CAST([UIV_CompensatieBedrag_Jaar] AS float) AS [UIV_CompensatieBedrag_Jaar], CAST([Promillage] AS decimal(10,5)) AS [Promillage], CAST([TotaleKorting_Jaar] AS decimal(19,2)) AS [TotaleKorting_Jaar], CAST([TotaleKortingPercentage] AS decimal(19,2)) AS [TotaleKortingPercentage], CAST([ProlongatieTussenpersoonKosten_Jaar] AS decimal(15,2)) AS [ProlongatieTussenpersoonKosten_Jaar] FROM [pbi].[Fact_Dekking_Detail]"
+        },
+        {
+            "name": "Fact_KentekensRDW",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_KentekensRDW",
+            "base_query": "SELECT CAST([Relatie_Id] AS int) AS [Relatie_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [Kenteken] AS [Kenteken], [Polisnummer] AS [Polisnummer], [Medewerker_Id] AS [Medewerker_Id], [Kantoor_Id] AS [Kantoor_Id], CAST([IngangWijziging_Datum] AS date) AS [IngangWijziging_Datum], [Wijzigingsreden_Id] AS [Wijzigingsreden_Id], [Maatschappij_Id] AS [Maatschappij_Id], CAST([Is_Wachtpolis] AS bit) AS [Is_Wachtpolis], [MeldingRDW_Id] AS [MeldingRDW_Id], CAST([MeldingGemaakt_Datum] AS date) AS [MeldingGemaakt_Datum], CAST([MeldingGemaakt_Datum_hist] AS date) AS [MeldingGemaakt_Datum_hist], CAST([AanmeldingRDW_Datum] AS date) AS [AanmeldingRDW_Datum], CAST([AantalDagenMelding] AS int) AS [AantalDagenMelding], [Verzekeringsvorm_Id] AS [Verzekeringsvorm_Id], CAST([StatusCode] AS int) AS [StatusCode] FROM [pbi].[Fact_KentekensRDW]"
+        },
+        {
+            "name": "Fact_MedewerkerPermissies",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_MedewerkerPermissies",
+            "base_query": "SELECT [Medewerker_Id] AS [Medewerker_Id], [Kantoor_Id] AS [Kantoor_Id], CAST([Is_Beheerder] AS bit) AS [Is_Beheerder], [Functie] AS [Functie], [Relatie] AS [Relatie], [Polis_Provinciaal] AS [Polis_Provinciaal], [Polis_Volmacht] AS [Polis_Volmacht], [Polis_Beurs] AS [Polis_Beurs], [Schade_Provinciaal] AS [Schade_Provinciaal], [Schade_Volmacht] AS [Schade_Volmacht], [Agenda] AS [Agenda], [Factuur] AS [Factuur], [Afdruk] AS [Afdruk], [DIS] AS [DIS], [BeheerAgentCollectiviteitMaatschappij] AS [BeheerAgentCollectiviteitMaatschappij], [Pakket] AS [Pakket], [LabelsVarSchermen] AS [LabelsVarSchermen], [BeursBoekingWacht] AS [BeursBoekingWacht], [AfwDossierItems] AS [AfwDossierItems], CAST([Is_MuterenAutomatischRekenen] AS bit) AS [Is_MuterenAutomatischRekenen] FROM [pbi].[Fact_MedewerkerPermissies]"
+        },
+        {
+            "name": "Fact_OpenstaandeFacturen",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_OpenstaandeFacturen",
+            "base_query": "SELECT [Factuurnummer] AS [Factuurnummer], [VerrekendFactuurnummer] AS [VerrekendFactuurnummer], [Maatschappij_Id] AS [Maatschappij_Id], [FactuurSoort_Id] AS [FactuurSoort_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], CAST([Is_FinancieelVerwerkt] AS bit) AS [Is_FinancieelVerwerkt], CAST([Is_Openstaand] AS bit) AS [Is_Openstaand], CAST([Is_Aanmanen] AS bit) AS [Is_Aanmanen], CAST([Is_RekeningCourant] AS bit) AS [Is_RekeningCourant], [BetrokkeneSoort] AS [BetrokkeneSoort], [RedenNietAanmanen] AS [RedenNietAanmanen], [MedewerkerNietAanmanen] AS [MedewerkerNietAanmanen], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [DekkingCode_Id] AS [DekkingCode_Id], [Kantoor_Id] AS [Kantoor_Id], [Medewerker_Id] AS [Medewerker_Id], [Incassowijze_Id] AS [Incassowijze_Id], CAST([Termijn] AS float) AS [Termijn], [Agent_Id] AS [Agent_Id], [Polis_Id] AS [Polis_Id], [Kenteken] AS [Kenteken], [FactuurTekst] AS [FactuurTekst], [Collectiviteit_Id] AS [Collectiviteit_Id], [PolisProducent_Id] AS [PolisProducent_Id], [BoekingSoort] AS [BoekingSoort], CAST([Factuur_Datum] AS date) AS [Factuur_Datum], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([Storno_Datum] AS date) AS [Storno_Datum], CAST([Is_WachtBoeking] AS bit) AS [Is_WachtBoeking], [WijzigingReden_Id] AS [WijzigingReden_Id], CAST([BetaaldBedrag] AS float) AS [BetaaldBedrag], CAST([OpenstaandBedrag] AS float) AS [OpenstaandBedrag], CAST([IncassoBedrag] AS float) AS [IncassoBedrag], CAST([Openstaand_Datum] AS date) AS [Openstaand_Datum], CAST([AantalHerinneringen] AS int) AS [AantalHerinneringen], CAST([AantalStorno] AS int) AS [AantalStorno], CAST([Is_RetourMaatschappij] AS bit) AS [Is_RetourMaatschappij], CAST([RetourMaatschappij_Datum] AS date) AS [RetourMaatschappij_Datum], CAST([IncassoUitHanden_Datum] AS date) AS [IncassoUitHanden_Datum], CAST([DagenOpenstaand] AS int) AS [DagenOpenstaand], [GroepOpenstaand] AS [GroepOpenstaand], CAST([Is_AgentIncasso] AS bit) AS [Is_AgentIncasso], [ExternFactuurnummer] AS [ExternFactuurnummer] FROM [pbi].[Fact_OpenstaandeFacturen]"
+        },
+        {
+            "name": "Fact_OpenstaandeFacturen_Cashbrokers",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_OpenstaandeFacturen_Cashbrokers",
+            "base_query": "SELECT [Factuurnummer] AS [Factuurnummer], [VerrekendFactuurnummer] AS [VerrekendFactuurnummer], [Maatschappij_Id] AS [Maatschappij_Id], [FactuurSoort_Id] AS [FactuurSoort_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], CAST([Is_FinancieelVerwerkt] AS bit) AS [Is_FinancieelVerwerkt], CAST([Is_Openstaand] AS bit) AS [Is_Openstaand], CAST([Is_Aanmanen] AS bit) AS [Is_Aanmanen], CAST([Is_RekeningCourant] AS bit) AS [Is_RekeningCourant], [RedenNietAanmanen] AS [RedenNietAanmanen], [MedewerkerNietAanmanen] AS [MedewerkerNietAanmanen], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [DekkingCode_Id] AS [DekkingCode_Id], [Kantoor_Id] AS [Kantoor_Id], [Medewerker_Id] AS [Medewerker_Id], [Incassowijze_Id] AS [Incassowijze_Id], CAST([Termijn] AS float) AS [Termijn], [Agent_Id] AS [Agent_Id], [Polis_Id] AS [Polis_Id], [Kenteken] AS [Kenteken], [FactuurTekst] AS [FactuurTekst], [Collectiviteit_Id] AS [Collectiviteit_Id], [PolisProducent_Id] AS [PolisProducent_Id], [BoekingSoort] AS [BoekingSoort], CAST([Factuur_Datum] AS date) AS [Factuur_Datum], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([Storno_Datum] AS date) AS [Storno_Datum], CAST([Is_WachtBoeking] AS bit) AS [Is_WachtBoeking], [WijzigingReden_Id] AS [WijzigingReden_Id], CAST([BetaaldBedrag] AS float) AS [BetaaldBedrag], CAST([OpenstaandBedrag] AS float) AS [OpenstaandBedrag], CAST([IncassoBedrag] AS float) AS [IncassoBedrag], CAST([Openstaand_Datum] AS date) AS [Openstaand_Datum], CAST([AantalHerinneringen] AS int) AS [AantalHerinneringen], CAST([AantalStorno] AS int) AS [AantalStorno], CAST([Is_RetourMaatschappij] AS bit) AS [Is_RetourMaatschappij], CAST([RetourMaatschappij_Datum] AS date) AS [RetourMaatschappij_Datum], CAST([IncassoUitHanden_Datum] AS date) AS [IncassoUitHanden_Datum], CAST([DagenOpenstaand] AS int) AS [DagenOpenstaand], [GroepOpenstaand] AS [GroepOpenstaand] FROM [pbi].[Fact_OpenstaandeFacturen_Cashbrokers]"
+        },
+        {
+            "name": "Fact_Pakket",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Pakket",
+            "base_query": "SELECT CAST([Relatie_Id] AS int) AS [Relatie_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [Pakketnummer] AS [Pakketnummer], [Incasso_Id] AS [Incasso_Id], [Agent_Id] AS [Agent_Id], [SoortPakket] AS [SoortPakket], CAST([Ingangs_Datum] AS date) AS [Ingangs_Datum], CAST([Eind_Datum] AS date) AS [Eind_Datum], CAST([Termijn] AS float) AS [Termijn], CAST([PremieVerval_Datum] AS date) AS [PremieVerval_Datum], CAST([Looptijd] AS float) AS [Looptijd], CAST([ContractVerval_Datum] AS date) AS [ContractVerval_Datum], CAST([Wijzigings_Datum] AS date) AS [Wijzigings_Datum], CAST([Expiratie_Datum] AS date) AS [Expiratie_Datum], CAST([Introductie_Datum] AS date) AS [Introductie_Datum], CAST([LaatsteWijzigings_Datum] AS date) AS [LaatsteWijzigings_Datum], [WijzigingsReden_Id] AS [WijzigingsReden_Id], [Kantoor_Id] AS [Kantoor_Id], [Medewerker_Id] AS [Medewerker_Id], CAST([HoofdVerval_Datum] AS date) AS [HoofdVerval_Datum], [Polis_Id] AS [Polis_Id], [Pakket_Id] AS [Pakket_Id], CAST([AantalPolissenPakket] AS float) AS [AantalPolissenPakket], CAST([ProlongatieTussenpersoonKosten] AS float) AS [ProlongatieTussenpersoonKosten], CAST([PakketKortingsPercentage] AS float) AS [PakketKortingsPercentage], [AantalPolissenKorting] AS [AantalPolissenKorting], [AantalRubrieken] AS [AantalRubrieken], [IncassoWijze_Id] AS [IncassoWijze_Id], [Voorwaarden_1] AS [Voorwaarden_1], [Voorwaarden_2] AS [Voorwaarden_2], [Voorwaarden_3] AS [Voorwaarden_3], [Voorwaarden_4] AS [Voorwaarden_4], [Voorwaarden_5] AS [Voorwaarden_5] FROM [pbi].[Fact_Pakket]"
+        },
+        {
+            "name": "Fact_Polis",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Polis",
+            "base_query": "SELECT CAST([Relatie_Id] AS int) AS [Relatie_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [Polisnummer] AS [Polisnummer], [Kenteken] AS [Kenteken], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [Maatschappij_Id] AS [Maatschappij_Id], [Verzekeringsvorm_Id] AS [Verzekeringsvorm_Id], [Collectiviteit_Id] AS [Collectiviteit_Id], [PolisProducent_Id] AS [PolisProducent_Id], [Incassowijze_Id] AS [Incassowijze_Id], [Agent_Id] AS [Agent_Id], CAST([Ingangs_Datum] AS date) AS [Ingangs_Datum], CAST([Termijn] AS float) AS [Termijn], CAST([PremieVerval_Datum] AS date) AS [PremieVerval_Datum], CAST([Looptijd] AS float) AS [Looptijd], CAST([ContractVerval_Datum] AS date) AS [ContractVerval_Datum], CAST([Wijzigings_Datum] AS date) AS [Wijzigings_Datum], CAST([Expiratie_Datum] AS date) AS [Expiratie_Datum], CAST([Introductie_Datum] AS date) AS [Introductie_Datum], CAST([LaatsteWijzigings_Datum] AS date) AS [LaatsteWijzigings_Datum], [WijzigingsReden_Id] AS [WijzigingsReden_Id], [Medewerker_Id] AS [Medewerker_Id], CAST([Terugval] AS int) AS [Terugval], CAST([HoofdVerval_Datum] AS date) AS [HoofdVerval_Datum], CAST([Gewicht] AS float) AS [Gewicht], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([CatalogusWaarde] AS float) AS [CatalogusWaarde], CAST([ProlongatieMaatschappijKosten] AS float) AS [ProlongatieMaatschappijKosten], CAST([AssurantieBelasting] AS float) AS [AssurantieBelasting], [BonusMalus_Serie] AS [BonusMalus_Serie], CAST([BonusMalus_StartTrede] AS float) AS [BonusMalus_StartTrede], CAST([BonusMalus_ExtraTrede] AS float) AS [BonusMalus_ExtraTrede], CAST([BonusMalus_TerugvalTrede] AS float) AS [BonusMalus_TerugvalTrede], CAST([BonusMalus_Trede] AS float) AS [BonusMalus_Trede], CAST([BonusMalus_Percentage] AS float) AS [BonusMalus_Percentage], CAST([BonusMalus_Bedrag] AS float) AS [BonusMalus_Bedrag], CAST([Eind_Datum] AS date) AS [Eind_Datum], [Status] AS [Status], CAST([IncassoBedrag_Jaar] AS decimal(15,2)) AS [IncassoBedrag_Jaar], CAST([PremieBruto_Jaar] AS decimal(15,2)) AS [PremieBruto_Jaar], CAST([PremieNetto_Jaar] AS decimal(15,2)) AS [PremieNetto_Jaar], CAST([IncassoProvisie_Jaar] AS decimal(15,2)) AS [IncassoProvisie_Jaar], CAST([AfsluitProvisie_Jaar] AS decimal(15,2)) AS [AfsluitProvisie_Jaar], CAST([BonusProvisie_Jaar] AS decimal(15,2)) AS [BonusProvisie_Jaar], CAST([AgentProvisie_Jaar] AS decimal(15,2)) AS [AgentProvisie_Jaar], CAST([ProlongatieTussenpersoonKosten_Jaar] AS decimal(15,2)) AS [ProlongatieTussenpersoonKosten_Jaar], [Polis_Id] AS [Polis_Id], [Pakket_Id] AS [Pakket_Id], [Pakketnummer] AS [Pakketnummer], CAST([Is_PakketPolis] AS bit) AS [Is_PakketPolis], CAST([Is_OpenstaandeAgendeAanwezig] AS bit) AS [Is_OpenstaandeAgendeAanwezig], [UIV_ResterendeJarenCompensatie] AS [UIV_ResterendeJarenCompensatie], [RedenKorting] AS [RedenKorting], [IntroductieReden] AS [IntroductieReden] FROM [pbi].[Fact_Polis]"
+        },
+        {
+            "name": "Fact_PoolInrichting",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_PoolInrichting",
+            "base_query": "SELECT [Maatschappij_Id] AS [Maatschappij_Id], [Pool_Volgnummer] AS [Pool_Volgnummer], [Pool_Omschrijving] AS [Pool_Omschrijving], CAST([Ingangs_Datum] AS date) AS [Ingangs_Datum], [Branche_Id] AS [Branche_Id], [DekkingCode_Id] AS [DekkingCode_Id], [Dekking] AS [Dekking], [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], CAST([Percentage_Aandeel] AS float) AS [Percentage_Aandeel], CAST([Percentage_DoorlopendeProvisie] AS float) AS [Percentage_DoorlopendeProvisie], CAST([Percentage_Afsluitprovisie] AS float) AS [Percentage_Afsluitprovisie], CAST([Percentage_VolmachtBeloning] AS decimal(7,6)) AS [Percentage_VolmachtBeloning], CAST([Is_Actief] AS bit) AS [Is_Actief], [MaatschappijSoort] AS [MaatschappijSoort] FROM [pbi].[Fact_PoolInrichting]"
+        },
+        {
+            "name": "Fact_Portefeuillestand",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Portefeuillestand",
+            "base_query": "SELECT [RelatieProducent_Id] AS [RelatieProducent_Id], [RelatieSoort_Id] AS [RelatieSoort_Id], [Belang] AS [Belang], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Polis_Id] AS [Polis_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [Polisnummer] AS [Polisnummer], [Maatschappij_Id] AS [Maatschappij_Id], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [Status] AS [Status], [PolisProducent_Id] AS [PolisProducent_Id], [Agent_Id] AS [Agent_Id], CAST([Termijn] AS int) AS [Termijn], CAST([PremieNetto_Jaar] AS decimal(15,2)) AS [PremieNetto_Jaar], CAST([PremieBruto_Jaar] AS decimal(15,2)) AS [PremieBruto_Jaar], CAST([IncassoProvisie_Jaar] AS decimal(15,2)) AS [IncassoProvisie_Jaar], CAST([AgentProvisie_Jaar] AS decimal(15,2)) AS [AgentProvisie_Jaar], CAST([Volmachtbeloning_Jaar] AS decimal(15,2)) AS [Volmachtbeloning_Jaar], CAST([VerzekerdeSom] AS decimal(19,2)) AS [VerzekerdeSom], CAST([UIV_ResterendeJarenCompensatie] AS int) AS [UIV_ResterendeJarenCompensatie], CAST([UIV_CompensatieBedrag_Jaar] AS decimal(19,2)) AS [UIV_CompensatieBedrag_Jaar], CAST([TotaleKorting_Jaar] AS decimal(19,2)) AS [TotaleKorting_Jaar], CAST([Retourprovisie_Jaar] AS decimal(19,2)) AS [Retourprovisie_Jaar], CAST([Draai_Datum] AS date) AS [Draai_Datum], [RelatieProducent] AS [RelatieProducent], [Collectiviteit_Id] AS [Collectiviteit_Id] FROM [pbi].[Fact_Portefeuillestand]"
+        },
+        {
+            "name": "Fact_Portefeuillestand_hist",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Portefeuillestand_hist",
+            "base_query": "SELECT [RelatieProducent_Id] AS [RelatieProducent_Id], [RelatieSoort_Id] AS [RelatieSoort_Id], [Belang] AS [Belang], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Polis_Id] AS [Polis_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [Polisnummer] AS [Polisnummer], [Maatschappij_Id] AS [Maatschappij_Id], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [Status] AS [Status], [PolisProducent_Id] AS [PolisProducent_Id], [Agent_Id] AS [Agent_Id], CAST([Termijn] AS int) AS [Termijn], CAST([PremieNetto_Jaar] AS decimal(15,2)) AS [PremieNetto_Jaar], CAST([PremieBruto_Jaar] AS decimal(15,2)) AS [PremieBruto_Jaar], CAST([IncassoProvisie_Jaar] AS decimal(15,2)) AS [IncassoProvisie_Jaar], CAST([AgentProvisie_Jaar] AS decimal(15,2)) AS [AgentProvisie_Jaar], CAST([Volmachtbeloning_Jaar] AS decimal(15,2)) AS [Volmachtbeloning_Jaar], CAST([VerzekerdeSom] AS decimal(19,2)) AS [VerzekerdeSom], CAST([UIV_ResterendeJarenCompensatie] AS int) AS [UIV_ResterendeJarenCompensatie], CAST([UIV_CompensatieBedrag_Jaar] AS decimal(19,2)) AS [UIV_CompensatieBedrag_Jaar], CAST([TotaleKorting_Jaar] AS decimal(19,2)) AS [TotaleKorting_Jaar], CAST([Retourprovisie_Jaar] AS decimal(19,2)) AS [Retourprovisie_Jaar], CAST([Draai_Datum] AS date) AS [Draai_Datum] FROM [dbo].[Fact_Portefeuillestand_hist]"
+        },
+        {
+            "name": "Fact_PremieFacturen",
+            "enabled": true,
+            "size_class": "L",
+            "load_mode": "window",
+            "delta_table": "Fact_PremieFacturen",
+            "base_query": "SELECT [Factuurnummer] AS [Factuurnummer], [Maatschappij_Id] AS [Maatschappij_Id], [MaatschappijSoort] AS [MaatschappijSoort], [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], [FactuurSoort_Id] AS [FactuurSoort_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], CAST([VolgnummerHistorie] AS int) AS [VolgnummerHistorie], CAST([Is_DetailAanwezig] AS bit) AS [Is_DetailAanwezig], CAST([Is_FinancieelVerwerkt] AS bit) AS [Is_FinancieelVerwerkt], CAST([Is_TerugboekProlongatie] AS bit) AS [Is_TerugboekProlongatie], CAST([Is_Openstaand] AS bit) AS [Is_Openstaand], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [DekkingCode_Id] AS [DekkingCode_Id], [Kantoor_Id] AS [Kantoor_Id], [Medewerker_Id] AS [Medewerker_Id], [Incassowijze_Id] AS [Incassowijze_Id], CAST([Termijn] AS int) AS [Termijn], [Agent_Id] AS [Agent_Id], [Polisnummer] AS [Polisnummer], [Polis_Id] AS [Polis_Id], [Kenteken] AS [Kenteken], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([BonusMalus_Percentage] AS float) AS [BonusMalus_Percentage], [FactuurTekst] AS [FactuurTekst], [Collectiviteit_Id] AS [Collectiviteit_Id], [PolisProducent_Id] AS [PolisProducent_Id], CAST([Factuur_Datum] AS date) AS [Factuur_Datum], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([Verval_Datum] AS date) AS [Verval_Datum], CAST([IngangWijziging_Datum] AS date) AS [IngangWijziging_Datum], CAST([Is_WachtBoeking] AS bit) AS [Is_WachtBoeking], [WijzigingReden_Id] AS [WijzigingReden_Id], CAST([IncassoBedrag] AS float) AS [IncassoBedrag], CAST([NettoMaatschappij] AS float) AS [NettoMaatschappij], CAST([NettoAgent] AS float) AS [NettoAgent], CAST([PremieNetto] AS float) AS [PremieNetto], CAST([PremieBruto] AS float) AS [PremieBruto], CAST([BonusMalus_Bedrag] AS float) AS [BonusMalus_Bedrag], CAST([TussenpersoonKosten] AS float) AS [TussenpersoonKosten], CAST([MaatschappijKosten] AS float) AS [MaatschappijKosten], CAST([AssurantieBelasting] AS float) AS [AssurantieBelasting], CAST([TermijnToeslagBedrag] AS float) AS [TermijnToeslagBedrag], CAST([RetourProvisie] AS float) AS [RetourProvisie], CAST([PakketKortingBedrag] AS float) AS [PakketKortingBedrag], CAST([CollectiviteitKortingBedrag] AS float) AS [CollectiviteitKortingBedrag], CAST([ToeslagBedrag] AS float) AS [ToeslagBedrag], CAST([IncassoProvisie] AS float) AS [IncassoProvisie], CAST([VolmachtBeloning] AS float) AS [VolmachtBeloning], CAST([AfsluitProvisie] AS float) AS [AfsluitProvisie], CAST([BonusProvisie] AS float) AS [BonusProvisie], CAST([ZelfWerkProvisie] AS float) AS [ZelfWerkProvisie], CAST([AgentProvisie] AS float) AS [AgentProvisie], CAST([AgentKosten] AS float) AS [AgentKosten], CAST([IncassoBedrag_ExclBTW] AS float) AS [IncassoBedrag_ExclBTW], [BTW_Id] AS [BTW_Id], CAST([BTW_Bedrag] AS float) AS [BTW_Bedrag], CAST([Tekenjaar] AS int) AS [Tekenjaar], [BoekingSoort] AS [BoekingSoort], CAST([VervalDatum_Herrekend] AS date) AS [VervalDatum_Herrekend], CAST([Percentage_Aandeel] AS float) AS [Percentage_Aandeel], [Verzekeringsvorm_Id] AS [Verzekeringsvorm_Id] FROM [pbi].[Fact_PremieFacturen]",
+            "window": "{\"partition_column\":\"Boek_Datum\",\"granularity\":\"month\",\"lookback_months\":12}"
+        },
+        {
+            "name": "Fact_PremieReserve",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_PremieReserve",
+            "base_query": "SELECT [Kantoor_Id] AS [Kantoor_Id], [Maatschappij_Id] AS [Maatschappij_Id], [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [DekkingCode_Id] AS [DekkingCode_Id], [Collectiviteit_Id] AS [Collectiviteit_Id], [Agent_Id] AS [Agent_Id], [PolisProducent_Id] AS [PolisProducent_Id], CAST([Tekenjaar] AS int) AS [Tekenjaar], CAST([PremieReserve] AS decimal(38,2)) AS [PremieReserve], CAST([IncassoProvisieReserve] AS decimal(38,2)) AS [IncassoProvisieReserve], CAST([VolmachtBeloningReserve] AS decimal(38,2)) AS [VolmachtBeloningReserve], CAST([VerdiendePremie] AS decimal(38,2)) AS [VerdiendePremie], CAST([VerdiendeProvisie] AS decimal(38,2)) AS [VerdiendeProvisie], CAST([VerdiendeVolmachtBeloning] AS decimal(38,2)) AS [VerdiendeVolmachtBeloning], CAST([Peil_Datum] AS date) AS [Peil_Datum], CAST([Peil_Jaar] AS date) AS [Peil_Jaar], [Verzekeringsvorm_Id] AS [Verzekeringsvorm_Id] FROM [pbi].[Fact_PremieReserve]"
+        },
+        {
+            "name": "Fact_PremieReserveBeurs",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_PremieReserveBeurs",
+            "base_query": "SELECT [Factuurnummer] AS [Factuurnummer], [Kantoor_Id] AS [Kantoor_Id], [Maatschappij_Id] AS [Maatschappij_Id], [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [DekkingCode_Id] AS [DekkingCode_Id], [Collectiviteit_Id] AS [Collectiviteit_Id], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Polis_Id] AS [Polis_Id], [Agent_Id] AS [Agent_Id], [PolisProducent_Id] AS [PolisProducent_Id], CAST([Tekenjaar] AS int) AS [Tekenjaar], CAST([GeboektePremie] AS float) AS [GeboektePremie], CAST([GeboekteProvisie] AS float) AS [GeboekteProvisie], CAST([GeboekteVolmachtbeloning] AS float) AS [GeboekteVolmachtbeloning], CAST([Termijn] AS float) AS [Termijn], CAST([IngangWijziging_Datum] AS date) AS [IngangWijziging_Datum], CAST([Verval_Datum] AS date) AS [Verval_Datum], [FactuurSoort_Id] AS [FactuurSoort_Id], CAST([VervalDatum_Herrekend] AS date) AS [VervalDatum_Herrekend], CAST([PremieReserve] AS decimal(19,2)) AS [PremieReserve], CAST([IncassoProvisieReserve] AS decimal(19,2)) AS [IncassoProvisieReserve], CAST([VolmachtBeloningReserve] AS decimal(19,2)) AS [VolmachtBeloningReserve], CAST([VerdiendePremie] AS float) AS [VerdiendePremie], CAST([VerdiendeProvisie] AS float) AS [VerdiendeProvisie], CAST([VerdiendeVolmachtBeloning] AS float) AS [VerdiendeVolmachtBeloning], CAST([Peil_Datum] AS date) AS [Peil_Datum], CAST([Peil_Jaar] AS date) AS [Peil_Jaar] FROM [pbi].[Fact_PremieReserveBeurs]"
+        },
+        {
+            "name": "Fact_Productie",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Productie",
+            "base_query": "SELECT CAST([Relatie_Id] AS int) AS [Relatie_Id], [Polis_Id] AS [Polis_Id], [Polisnummer] AS [Polisnummer], [Medewerker_Id] AS [Medewerker_Id], [PolisProductent_Id] AS [PolisProductent_Id], [Agent_Id] AS [Agent_Id], [Maatschappij_Id] AS [Maatschappij_Id], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [Wijzigingsreden_Id] AS [Wijzigingsreden_Id], [ProductieSoort] AS [ProductieSoort], CAST([Productie_Datum] AS date) AS [Productie_Datum], CAST([Ingangs_Datum] AS date) AS [Ingangs_Datum], CAST([PremieNetto_Jaar] AS decimal(15,2)) AS [PremieNetto_Jaar], CAST([IncassoProvisie_Jaar] AS decimal(15,2)) AS [IncassoProvisie_Jaar], [Royementsreden] AS [Royementsreden] FROM [pbi].[Fact_Productie]"
+        },
+        {
+            "name": "Fact_Schadeboekingen",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Schadeboekingen",
+            "base_query": "SELECT [Schade_Id] AS [Schade_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Polis_Id] AS [Polis_Id], [DekkingCode_Id] AS [DekkingCode_Id], [SchadeCode_Id] AS [SchadeCode_Id], [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], [Collectiviteit_Id] AS [Collectiviteit_Id], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([GecorrigeerdeBoek_Datum] AS date) AS [GecorrigeerdeBoek_Datum], CAST([Tekenjaar] AS int) AS [Tekenjaar], CAST([UitloopjaarSchadeboeking] AS int) AS [UitloopjaarSchadeboeking], CAST([UitloopjaarMelddatum] AS int) AS [UitloopjaarMelddatum], CAST([UitloopjaarTekenjaarBoekdatum] AS int) AS [UitloopjaarTekenjaarBoekdatum], CAST([UitloopjaarTekenjaarMelddatum] AS int) AS [UitloopjaarTekenjaarMelddatum], CAST([ReserveCasco] AS decimal(18,2)) AS [ReserveCasco], CAST([ReserveKosten] AS decimal(18,2)) AS [ReserveKosten], CAST([ReserveWA] AS decimal(18,2)) AS [ReserveWA], CAST([BetaaldCasco] AS decimal(18,2)) AS [BetaaldCasco], CAST([BetaaldWA] AS decimal(18,2)) AS [BetaaldWA], CAST([BetaaldKosten] AS decimal(18,2)) AS [BetaaldKosten], CAST([VerhaaldCasco] AS decimal(18,2)) AS [VerhaaldCasco], CAST([VerhaaldWA] AS decimal(18,2)) AS [VerhaaldWA], CAST([VerhaaldKosten] AS decimal(18,2)) AS [VerhaaldKosten], CAST([EigenRisico] AS decimal(18,2)) AS [EigenRisico], CAST([Is_SchuldSchade] AS bit) AS [Is_SchuldSchade], CAST([Is_LetselSchade] AS bit) AS [Is_LetselSchade], CAST([TotaleSchadelast] AS float) AS [TotaleSchadelast], CAST([BetaaldAfmakingsCourtage] AS decimal(18,2)) AS [BetaaldAfmakingsCourtage], CAST([BetaaldPortiSluit] AS decimal(18,2)) AS [BetaaldPortiSluit], CAST([BetaaldOnderzoekKosten] AS decimal(18,2)) AS [BetaaldOnderzoekKosten], CAST([BetaaldBehandelKosten] AS decimal(18,2)) AS [BetaaldBehandelKosten], CAST([BetaaldWettelijkeRente] AS decimal(18,2)) AS [BetaaldWettelijkeRente], CAST([BetaaldExpertiseKosten] AS decimal(18,2)) AS [BetaaldExpertiseKosten], CAST([BetaaldDiverseKosten] AS decimal(18,2)) AS [BetaaldDiverseKosten], CAST([BetaaldDSA] AS decimal(18,2)) AS [BetaaldDSA], CAST([VerhaaldDSA] AS decimal(18,2)) AS [VerhaaldDSA], CAST([VerhaaldService] AS decimal(18,2)) AS [VerhaaldService] FROM [pbi].[Fact_Schadeboekingen]"
+        },
+        {
+            "name": "Fact_SchadeFacturen",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_SchadeFacturen",
+            "base_query": "SELECT [Factuurnummer] AS [Factuurnummer], [Maatschappij_Id] AS [Maatschappij_Id], [DetailMaatschappij_Id] AS [DetailMaatschappij_Id], [FactuurSoort_Id] AS [FactuurSoort_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], CAST([Is_FinancieelVerwerkt] AS bit) AS [Is_FinancieelVerwerkt], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [DekkingCode_Id] AS [DekkingCode_Id], [Kantoor_Id] AS [Kantoor_Id], [Medewerker_Id] AS [Medewerker_Id], [Incassowijze_Id] AS [Incassowijze_Id], [Agent_Id] AS [Agent_Id], [Polis_Id] AS [Polis_Id], [Polisnummer] AS [Polisnummer], [Kenteken] AS [Kenteken], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([BonusMalus_Percentage] AS float) AS [BonusMalus_Percentage], [FactuurTekst] AS [FactuurTekst], [Collectiviteit_Id] AS [Collectiviteit_Id], [PolisProducent_Id] AS [PolisProducent_Id], CAST([Factuur_Datum] AS date) AS [Factuur_Datum], CAST([Boek_Datum] AS date) AS [Boek_Datum], CAST([Is_WachtBoeking] AS bit) AS [Is_WachtBoeking], [WijzigingReden_Id] AS [WijzigingReden_Id], [Schade_Id] AS [Schade_Id], CAST([Schadenummer] AS int) AS [Schadenummer], [SchadenummerExtern] AS [SchadenummerExtern], [SchadeCode_Id] AS [SchadeCode_Id], [SchadeSoort_Id] AS [SchadeSoort_Id], CAST([Is_AfmakingsCourtageVerzekerd] AS bit) AS [Is_AfmakingsCourtageVerzekerd], CAST([Tekenjaar] AS int) AS [Tekenjaar], CAST([CascoBedrag] AS float) AS [CascoBedrag], CAST([WABedrag] AS float) AS [WABedrag], CAST([KostenRelatie] AS float) AS [KostenRelatie], CAST([KostenMaatschappij] AS float) AS [KostenMaatschappij], CAST([AfmakingsCourtageBedrag] AS float) AS [AfmakingsCourtageBedrag], CAST([EigenRisicoBedrag] AS float) AS [EigenRisicoBedrag], CAST([EigenRisicoWABedrag] AS float) AS [EigenRisicoWABedrag], CAST([PortiSluitBedrag] AS float) AS [PortiSluitBedrag], CAST([OnderzoekBedrag] AS float) AS [OnderzoekBedrag], CAST([BehandelBedrag] AS float) AS [BehandelBedrag], CAST([WettelijkRenteBedrag] AS float) AS [WettelijkRenteBedrag], CAST([ExpertiseBedrag] AS float) AS [ExpertiseBedrag], CAST([DiverseBedrag] AS float) AS [DiverseBedrag], CAST([ServiceVerhaaldBedrag] AS float) AS [ServiceVerhaaldBedrag], CAST([VerhaaldBedrag] AS float) AS [VerhaaldBedrag], CAST([IncassoBedrag] AS float) AS [IncassoBedrag], CAST([NettoMaatschappij] AS float) AS [NettoMaatschappij], CAST([NettoAgent] AS float) AS [NettoAgent], CAST([IncassoBedrag_ExclBTW] AS float) AS [IncassoBedrag_ExclBTW], CAST([BTW_Bedrag] AS float) AS [BTW_Bedrag], CAST([Kosten] AS float) AS [Kosten], CAST([KostenBedrag] AS float) AS [KostenBedrag], CAST([Percentage_Aandeel] AS float) AS [Percentage_Aandeel] FROM [pbi].[Fact_SchadeFacturen]"
+        },
+        {
+            "name": "Fact_WachtDekking",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_WachtDekking",
+            "base_query": "SELECT [WachtDekking_Id] AS [WachtDekking_Id], [WachtPolis_Id] AS [WachtPolis_Id], [Polis_Id] AS [Polis_Id], CAST([VolgnummerDekking] AS int) AS [VolgnummerDekking], CAST([VolgnummerWacht] AS int) AS [VolgnummerWacht], [DekkingCode_Id] AS [DekkingCode_Id], [TariefSoort] AS [TariefSoort], CAST([Tarief_Datum] AS date) AS [Tarief_Datum], CAST([IncassoBedrag] AS float) AS [IncassoBedrag], CAST([BonusMalis_Bedrag] AS float) AS [BonusMalis_Bedrag], CAST([AgentProvisie] AS float) AS [AgentProvisie], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([CollectiviteitKortingPercentage] AS float) AS [CollectiviteitKortingPercentage], CAST([ToeslagPercentage] AS float) AS [ToeslagPercentage], CAST([ToeslagBedrag] AS float) AS [ToeslagBedrag], [TermijnToeslagTabel] AS [TermijnToeslagTabel], CAST([AssurantieBelasting] AS float) AS [AssurantieBelasting], CAST([MaatschappijKosten] AS float) AS [MaatschappijKosten], CAST([PremieBruto_Jaar] AS decimal(15,2)) AS [PremieBruto_Jaar], CAST([PremieNetto_Jaar] AS decimal(15,2)) AS [PremieNetto_Jaar], CAST([IncassoProvisie_Jaar] AS decimal(15,2)) AS [IncassoProvisie_Jaar], CAST([AfsluitProvisie_Jaar] AS decimal(15,2)) AS [AfsluitProvisie_Jaar], CAST([BonusProvisie_Jaar] AS decimal(15,2)) AS [BonusProvisie_Jaar], CAST([AgentProvisie_Jaar] AS decimal(15,2)) AS [AgentProvisie_Jaar], CAST([VolmachtBeloning_Jaar] AS decimal(15,2)) AS [VolmachtBeloning_Jaar], CAST([ToeslagBedrag_Jaar] AS decimal(15,2)) AS [ToeslagBedrag_Jaar], CAST([BonusMalis_Bedrag_Jaar] AS decimal(15,2)) AS [BonusMalis_Bedrag_Jaar], CAST([CollectiviteitKorting_Jaar] AS decimal(15,2)) AS [CollectiviteitKorting_Jaar], CAST([PakketKorting_Jaar] AS decimal(15,2)) AS [PakketKorting_Jaar], CAST([ToeslagBedragTotaal_Jaar] AS decimal(15,2)) AS [ToeslagBedragTotaal_Jaar], CAST([TermijnToeslagBedrag_Jaar] AS decimal(15,2)) AS [TermijnToeslagBedrag_Jaar], CAST([UIV_Compensatiebedrag_Jaar] AS decimal(15,2)) AS [UIV_Compensatiebedrag_Jaar] FROM [pbi].[Fact_WachtDekking]"
+        },
+        {
+            "name": "Fact_WachtPolis",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_WachtPolis",
+            "base_query": "SELECT [WachtPolis_Id] AS [WachtPolis_Id], [Polis_Id] AS [Polis_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], CAST([VolgnummerWacht] AS int) AS [VolgnummerWacht], [WijzigingReden] AS [WijzigingReden], [Polisnummer] AS [Polisnummer], [Kenteken] AS [Kenteken], [Hoofdbranche_Id] AS [Hoofdbranche_Id], [Branche_Id] AS [Branche_Id], [Maatschappij_Id] AS [Maatschappij_Id], [Verzekeringsvorm_Id] AS [Verzekeringsvorm_Id], [Collectiviteit_Id] AS [Collectiviteit_Id], [PolisProducent_Id] AS [PolisProducent_Id], [Incassowijze_Id] AS [Incassowijze_Id], [Agent_Id] AS [Agent_Id], CAST([Ingangs_Datum] AS date) AS [Ingangs_Datum], CAST([Termijn] AS float) AS [Termijn], CAST([PremieVerval_Datum] AS date) AS [PremieVerval_Datum], CAST([Looptijd] AS float) AS [Looptijd], CAST([ContractVerval_Datum] AS date) AS [ContractVerval_Datum], CAST([Wijzigings_Datum] AS date) AS [Wijzigings_Datum], CAST([Expiratie_Datum] AS date) AS [Expiratie_Datum], CAST([Introductie_Datum] AS date) AS [Introductie_Datum], CAST([LaatsteWijzigings_Datum] AS date) AS [LaatsteWijzigings_Datum], CAST([Wacht_Datum] AS date) AS [Wacht_Datum], [IntroductieReden_Id] AS [IntroductieReden_Id], [WijzigingsReden_Id] AS [WijzigingsReden_Id], [Kantoor_Id] AS [Kantoor_Id], [Medewerker_Id] AS [Medewerker_Id], CAST([Terugval] AS int) AS [Terugval], CAST([HoofdVerval_Datum] AS date) AS [HoofdVerval_Datum], CAST([Gewicht] AS float) AS [Gewicht], CAST([VerzekerdeSom] AS float) AS [VerzekerdeSom], CAST([CatalogusWaarde] AS float) AS [CatalogusWaarde], CAST([ProlongatieTussenpersoonKosten] AS float) AS [ProlongatieTussenpersoonKosten], CAST([ProlongatieMaatschappijKosten] AS float) AS [ProlongatieMaatschappijKosten], CAST([AssurantieBelasting] AS float) AS [AssurantieBelasting], [BonusMalis_Serie] AS [BonusMalis_Serie], [BonusMalis_StartTrede] AS [BonusMalis_StartTrede], [BonusMalis_ExtraTrede] AS [BonusMalis_ExtraTrede], CAST([BonusMalis_TerugvalTrede] AS float) AS [BonusMalis_TerugvalTrede], [BonusMalis_Trede] AS [BonusMalis_Trede], CAST([BonusMalis_Percentage] AS float) AS [BonusMalis_Percentage], CAST([BonusMalis_Bedrag] AS float) AS [BonusMalis_Bedrag], CAST([Begin_Datum] AS date) AS [Begin_Datum], CAST([Eind_Datum] AS date) AS [Eind_Datum], [Status] AS [Status], CAST([IncassoBedrag_Jaar] AS decimal(15,2)) AS [IncassoBedrag_Jaar], CAST([PremieBruto_Jaar] AS decimal(15,2)) AS [PremieBruto_Jaar], CAST([PremieNetto_Jaar] AS decimal(15,2)) AS [PremieNetto_Jaar], CAST([IncassoProvisie_Jaar] AS decimal(15,2)) AS [IncassoProvisie_Jaar], CAST([AfsluitProvisie_Jaar] AS decimal(15,2)) AS [AfsluitProvisie_Jaar], CAST([BonusProvisie_Jaar] AS decimal(15,2)) AS [BonusProvisie_Jaar], CAST([AgentProvisie_Jaar] AS decimal(15,2)) AS [AgentProvisie_Jaar], CAST([IngangWijziging_Datum] AS date) AS [IngangWijziging_Datum], CAST([OuderdomWacht_Dagen] AS int) AS [OuderdomWacht_Dagen], CAST([Is_EenOpenstaandeAgendaOpPolisAanwezig] AS bit) AS [Is_EenOpenstaandeAgendaOpPolisAanwezig], [UIV_ResterendeJarenCompensatie] AS [UIV_ResterendeJarenCompensatie], [RedenKorting] AS [RedenKorting] FROM [pbi].[Fact_WachtPolis]"
+        },
+        {
+            "name": "Fact_Werklijst",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Fact_Werklijst",
+            "base_query": "SELECT [Medewerker_Id] AS [Medewerker_Id], [Afdeling_Id] AS [Afdeling_Id], [Kantoor_Id] AS [Kantoor_Id], CAST([Relatie_Id] AS int) AS [Relatie_Id], CAST([Schadenummer] AS int) AS [Schadenummer], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [Dossiernummer] AS [Dossiernummer], CAST([Is_Afgehandeld] AS bit) AS [Is_Afgehandeld], [Status] AS [Status], [Prioriteit] AS [Prioriteit], CAST([Is_Mail] AS bit) AS [Is_Mail], [AgendaSoort] AS [AgendaSoort], CAST([Aanmaak_Datum] AS date) AS [Aanmaak_Datum], CAST([Taak_Datum] AS date) AS [Taak_Datum], CAST([Uitvoer_Datum] AS date) AS [Uitvoer_Datum], CAST([Doorlooptijd] AS int) AS [Doorlooptijd], [Werklijst_Omschrijving] AS [Werklijst_Omschrijving], [Onderwerp] AS [Onderwerp] FROM [pbi].[Fact_Werklijst]"
+        },
+        {
+            "name": "Facturatiegroep",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Facturatiegroep",
+            "base_query": "SELECT [server] AS [server], CAST([Aantal_Polissen] AS int) AS [Aantal_Polissen], CAST([Facturatiegroep] AS int) AS [Facturatiegroep] FROM [dbo].[Facturatiegroep]"
+        },
+        {
+            "name": "Jobmonitor",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Jobmonitor",
+            "base_query": "SELECT [server] AS [server], [job_name] AS [job_name], CAST([enabled] AS smallint) AS [enabled], CAST([is_insurance_data_job] AS int) AS [is_insurance_data_job], [run_status] AS [run_status], CONVERT(varchar(8), [duration_hours], 108) AS [duration_hours], CAST([session_id] AS int) AS [session_id], CAST([start_execution_date] AS datetime2(3)) AS [start_execution_date], CAST([stop_execution_date] AS datetime2(3)) AS [stop_execution_date], CAST([last_executed_step_date] AS datetime2(3)) AS [last_executed_step_date], CAST([next_scheduled_run_date] AS datetime2(3)) AS [next_scheduled_run_date], CAST([step_id] AS int) AS [step_id], [step_name] AS [step_name], [last_run_outcome] AS [last_run_outcome], CAST([last_run_date] AS date) AS [last_run_date], [last_outcome_message] AS [last_outcome_message] FROM [dbo].[Jobmonitor]"
+        },
+        {
+            "name": "LaatsteVerversing",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "LaatsteVerversing",
+            "base_query": "SELECT [Databasenaam] AS [Databasenaam], CAST([Is_Geslaagd] AS bit) AS [Is_Geslaagd], CAST([LaatsteVerversingTijd] AS datetime2(3)) AS [LaatsteVerversingTijd] FROM [dbo].[LaatsteVerversing]"
+        },
+        {
+            "name": "Landcode",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Landcode",
+            "base_query": "SELECT CAST([Nummer] AS int) AS [Nummer], [Land] AS [Land], [2_lettercode] AS [2_lettercode], [3_lettercode] AS [3_lettercode] FROM [dbo].[Landcode]"
+        },
+        {
+            "name": "MetaData",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "MetaData",
+            "base_query": "SELECT CAST([Index] AS int) AS [Index], [Tabel_Naam] AS [Tabel_Naam], CAST([Is_Actief] AS bit) AS [Is_Actief], [Omschrijving] AS [Omschrijving], [Standaard_Waarde] AS [Standaard_Waarde], [Waarde] AS [Waarde] FROM [dbo].[MetaData]"
+        },
+        {
+            "name": "Nulmeting_Clausules",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_Clausules",
+            "base_query": "SELECT [Code] AS [Code], [CodeOmschrijving] AS [CodeOmschrijving], CAST([10703_Lopend] AS int) AS [10703_Lopend], CAST([10703_Royement] AS int) AS [10703_Royement], CAST([10704_Lopend] AS int) AS [10704_Lopend], CAST([10704_Royement] AS int) AS [10704_Royement], CAST([10705_Lopend] AS int) AS [10705_Lopend], CAST([10705_Royement] AS int) AS [10705_Royement], CAST([10706_Lopend] AS int) AS [10706_Lopend], CAST([10706_Royement] AS int) AS [10706_Royement], CAST([10707_Lopend] AS int) AS [10707_Lopend], CAST([10707_Royement] AS int) AS [10707_Royement], CAST([10715_Lopend] AS int) AS [10715_Lopend], CAST([10715_Royement] AS int) AS [10715_Royement], CAST([10716_Lopend] AS int) AS [10716_Lopend], CAST([10716_Royement] AS int) AS [10716_Royement], CAST([10717_Lopend] AS int) AS [10717_Lopend], CAST([10717_Royement] AS int) AS [10717_Royement], CAST([10718_Lopend] AS int) AS [10718_Lopend], CAST([10718_Royement] AS int) AS [10718_Royement], CAST([10719_Lopend] AS int) AS [10719_Lopend], CAST([10719_Royement] AS int) AS [10719_Royement], CAST([10720_Lopend] AS int) AS [10720_Lopend], CAST([10720_Royement] AS int) AS [10720_Royement], CAST([10721_Lopend] AS int) AS [10721_Lopend], CAST([10721_Royement] AS int) AS [10721_Royement], CAST([10722_Lopend] AS int) AS [10722_Lopend], CAST([10722_Royement] AS int) AS [10722_Royement] FROM [pbi].[Nulmeting_Clausules]"
+        },
+        {
+            "name": "Nulmeting_CodesDekking",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_CodesDekking",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [LabelOmschrijving] AS [LabelOmschrijving], [Code] AS [Code], [CodeOmschrijving] AS [CodeOmschrijving], [ActiefJN] AS [ActiefJN], CAST([Aantal] AS int) AS [Aantal], CAST([Royement] AS int) AS [Royement], CAST([Lopend] AS int) AS [Lopend] FROM [pbi].[Nulmeting_CodesDekking]"
+        },
+        {
+            "name": "Nulmeting_CodesNAW",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_CodesNAW",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [LabelOmschrijving] AS [LabelOmschrijving], [Code] AS [Code], [CodeOmschrijving] AS [CodeOmschrijving], [ActiefJN] AS [ActiefJN], CAST([Aantal] AS int) AS [Aantal], CAST([Royement] AS int) AS [Royement], CAST([Lopend] AS int) AS [Lopend] FROM [pbi].[Nulmeting_CodesNAW]"
+        },
+        {
+            "name": "Nulmeting_CodesPolis",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_CodesPolis",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [LabelOmschrijving] AS [LabelOmschrijving], [Code] AS [Code], [CodeOmschrijving] AS [CodeOmschrijving], [ActiefJN] AS [ActiefJN], CAST([Aantal] AS int) AS [Aantal], CAST([Royement] AS int) AS [Royement], CAST([Lopend] AS int) AS [Lopend] FROM [pbi].[Nulmeting_CodesPolis]"
+        },
+        {
+            "name": "Nulmeting_LabelDekking",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_LabelDekking",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [Omschrijving] AS [Omschrijving], CAST([Aantal] AS int) AS [Aantal], CAST([Lopend] AS int) AS [Lopend], CAST([Royement] AS int) AS [Royement], [DisplayWijze] AS [DisplayWijze], [CodeJN] AS [CodeJN], [Soort_Label] AS [Soort_Label] FROM [pbi].[Nulmeting_LabelDekking]"
+        },
+        {
+            "name": "Nulmeting_LabelNAW",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_LabelNAW",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [Omschrijving] AS [Omschrijving], CAST([Aantal] AS int) AS [Aantal], CAST([Lopend] AS int) AS [Lopend], CAST([Royement] AS int) AS [Royement], [DisplayWijze] AS [DisplayWijze], [CodeJN] AS [CodeJN], [Soort_Label] AS [Soort_Label] FROM [pbi].[Nulmeting_LabelNAW]"
+        },
+        {
+            "name": "Nulmeting_LabelPolis",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_LabelPolis",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [Omschrijving] AS [Omschrijving], CAST([Aantal] AS int) AS [Aantal], CAST([Lopend] AS int) AS [Lopend], CAST([Royement] AS int) AS [Royement], [DisplayWijze] AS [DisplayWijze], [CodeJN] AS [CodeJN], [Soort_Label] AS [Soort_Label] FROM [pbi].[Nulmeting_LabelPolis]"
+        },
+        {
+            "name": "Nulmeting_NAWDetails",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_NAWDetails",
+            "base_query": "SELECT CAST([Relatienummer] AS int) AS [Relatienummer], [Naam] AS [Naam] FROM [pbi].[Nulmeting_NAWDetails]"
+        },
+        {
+            "name": "Nulmeting_NAWLabels",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_NAWLabels",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [Labelwaarde] AS [Labelwaarde], CAST([Relatienummer] AS int) AS [Relatienummer] FROM [pbi].[Nulmeting_NAWLabels]"
+        },
+        {
+            "name": "Nulmeting_PolisDetails",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_PolisDetails",
+            "base_query": "SELECT [PolisId] AS [PolisId], [Polisnummer] AS [Polisnummer], [Maatschappijnummer] AS [Maatschappijnummer], [Maatschappijnaam] AS [Maatschappijnaam], [Maatschappijsoort] AS [Maatschappijsoort], [HoofdbrancheCode] AS [HoofdbrancheCode], [Hoofdbranche] AS [Hoofdbranche], [BrancheCode] AS [BrancheCode], [Branche] AS [Branche], [VerzekeringsvormCode] AS [VerzekeringsvormCode], [VerzekeringsvormOmschrijving] AS [VerzekeringsvormOmschrijving], [WijzigingsredenCode] AS [WijzigingsredenCode], [Wijzigingsreden] AS [Wijzigingsreden], [PolisStatus] AS [PolisStatus] FROM [pbi].[Nulmeting_PolisDetails]"
+        },
+        {
+            "name": "Nulmeting_PolisLabels",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_PolisLabels",
+            "base_query": "SELECT CAST([Label] AS int) AS [Label], [Labelwaarde] AS [Labelwaarde], CAST([Relatienummer] AS int) AS [Relatienummer], [Volgnummer] AS [Volgnummer], CAST([VolgnummerSub] AS int) AS [VolgnummerSub], [LabelId] AS [LabelId], [PolisId] AS [PolisId], [Polisnummer] AS [Polisnummer] FROM [pbi].[Nulmeting_PolisLabels]"
+        },
+        {
+            "name": "Nulmeting_Voorwaarden",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Nulmeting_Voorwaarden",
+            "base_query": "SELECT [Code] AS [Code], [CodeOmschrijving] AS [CodeOmschrijving], CAST([10698_Lopend] AS int) AS [10698_Lopend], CAST([10698_Royement] AS int) AS [10698_Royement], CAST([10699_Lopend] AS int) AS [10699_Lopend], CAST([10699_Royement] AS int) AS [10699_Royement], CAST([10700_Lopend] AS int) AS [10700_Lopend], CAST([10700_Royement] AS int) AS [10700_Royement], CAST([10701_Lopend] AS int) AS [10701_Lopend], CAST([10701_Royement] AS int) AS [10701_Royement], CAST([10702_Lopend] AS int) AS [10702_Lopend], CAST([10702_Royement] AS int) AS [10702_Royement], CAST([80750_Lopend] AS int) AS [80750_Lopend], CAST([80750_Royement] AS int) AS [80750_Royement], CAST([86251_Lopend] AS int) AS [86251_Lopend], CAST([86251_Royement] AS int) AS [86251_Royement] FROM [pbi].[Nulmeting_Voorwaarden]"
+        },
+        {
+            "name": "VrijeLabels",
+            "enabled": false,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "VrijeLabels",
+            "base_query": "SELECT [Vrij_Label] AS [Vrij_Label], CAST([VolgnrLabel] AS int) AS [VolgnrLabel], [Niveau] AS [Niveau] FROM [dbo].[VrijeLabels]"
+        }
+    ]
+}
