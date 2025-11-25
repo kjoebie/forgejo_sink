@@ -1,0 +1,167 @@
+{
+    "source": "vizier",
+    "run_date_utc": null,
+    "watermarks_path": "config/watermarks.json",
+    "base_files": "greenhouse_sources",
+    "connection_name": "connection_vizier_prod",
+    "defaults": {
+        "concurrency_large": 2,
+        "concurrency_small": 8,
+        "max_rows_per_file_large": 15000000,
+        "max_rows_per_file_small": 1000000
+    },
+    "tables": [
+        {
+            "name": "AdK_20250718_Docstore_GUIDs",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "AdK_20250718_Docstore_GUIDs",
+            "base_query": "SELECT CAST([Viziernr] AS bigint) AS [Viziernr], CAST([DkDatum] AS int) AS [DkDatum], [DkTitel] AS [DkTitel], [Extern_systeem] AS [Extern_systeem], [GUID] AS [GUID] FROM [dbo].[AdK_20250718_Docstore_GUIDs]"
+        },
+        {
+            "name": "Adresbeeld",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Adresbeeld",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([id_relatie_1] AS bigint) AS [id_relatie_1], CAST([Viziernr_1] AS bigint) AS [Viziernr_1], CAST([id_relatie_2] AS bigint) AS [id_relatie_2], CAST([Viziernr_2] AS bigint) AS [Viziernr_2], [Soort] AS [Soort], [Onderwerp] AS [Onderwerp], [Omschrijving] AS [Omschrijving], CAST([new_dt] AS bigint) AS [new_dt], CAST([UPD_DT] AS bigint) AS [UPD_DT], CAST([Tenant] AS int) AS [Tenant] FROM [dbo].[Adresbeeld]"
+        },
+        {
+            "name": "Contactmomenten",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Contactmomenten",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([id_relatie] AS bigint) AS [id_relatie], CAST([id_startcontactmoment] AS bigint) AS [id_startcontactmoment], CAST([id_polis] AS bigint) AS [id_polis], [contactstatus] AS [contactstatus], [Kanaal] AS [Kanaal], CAST([neu] AS bigint) AS [neu], CAST([Upd] AS bigint) AS [Upd], CAST([Contactdatum] AS bigint) AS [Contactdatum], CAST([Opvolgdatum] AS int) AS [Opvolgdatum], [Verantwoordelijke] AS [Verantwoordelijke], [aangemaakt_door] AS [aangemaakt_door], [onderwerptype] AS [onderwerptype], [betreft] AS [betreft], CAST([id_campagne] AS bigint) AS [id_campagne], [campagne] AS [campagne], CAST([id_actie] AS bigint) AS [id_actie], [actie] AS [actie], [respset_contact] AS [respset_contact], [respons] AS [respons], CAST([Tenant] AS int) AS [Tenant], CAST([uitgaand_contact] AS bit) AS [uitgaand_contact], CAST([id_verkoopkans] AS bigint) AS [id_verkoopkans], CAST([contactpersoon] AS bigint) AS [contactpersoon] FROM [dbo].[Contactmomenten]"
+        },
+        {
+            "name": "Contactpersonen",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Contactpersonen",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([KP_statnr] AS bigint) AS [KP_statnr], CAST([KP_volgnr] AS bigint) AS [KP_volgnr], CAST([id_fi] AS bigint) AS [id_fi], CAST([FI_statnr] AS bigint) AS [FI_statnr], CAST([FI_volgnr] AS bigint) AS [FI_volgnr], [Achternaam] AS [Achternaam], [Voornaam] AS [Voornaam], [Telefoon] AS [Telefoon], [Telefoon 2] AS [Telefoon_2], CAST([Date of birth] AS int) AS [Date_of_birth], [E-mail] AS [E_mail], CAST([New_dt] AS bigint) AS [New_dt], CAST([Upd_dt] AS bigint) AS [Upd_dt], CAST([DelCd.] AS bit) AS [DelCd_], CAST([Tenant] AS int) AS [Tenant], [Type] AS [Type], CAST([Actief] AS bit) AS [Actief], [Naam] AS [Naam], CAST([Primair] AS bit) AS [Primair], [Functie] AS [Functie], CAST([Wealth] AS bit) AS [Wealth], CAST([Health] AS bit) AS [Health], CAST([IPM] AS bit) AS [IPM], [Voorvoegsel] AS [Voorvoegsel], [Voorletters] AS [Voorletters], [Roepnaam] AS [Roepnaam], [Aanhef] AS [Aanhef], [Adressering] AS [Adressering], [Geslacht] AS [Geslacht], CAST([Digitale facturen] AS bit) AS [Digitale_facturen], CAST([Digitale polis] AS bit) AS [Digitale_polis] FROM [dbo].[Contactpersonen]"
+        },
+        {
+            "name": "DnB",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "DnB",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_DnB_GUP] AS bigint) AS [ID_DnB_GUP], CAST([ID_DnB_DUP] AS bigint) AS [ID_DnB_DUP], [Duns nummer] AS [Duns_nummer], [KvK Nummer] AS [KvK_Nummer], [KvK Vestigingsnummer] AS [KvK_Vestigingsnummer], [Statutaire naam] AS [Statutaire_naam], [Handelsnaam] AS [Handelsnaam], [Rechtsvorm] AS [Rechtsvorm], [SBI_1] AS [SBI_1], [SBI_2] AS [SBI_2], [SBI_3] AS [SBI_3], [Commerciele SBI] AS [Commerciele_SBI], [Start Date] AS [Start_Date], CAST([Datum faillissement] AS int) AS [Datum_faillissement], CAST([Datum uitschrijven KvK] AS int) AS [Datum_uitschrijven_KvK], [Aantal medewerkers] AS [Aantal_medewerkers], [Telefoon] AS [Telefoon], [Email] AS [Email], [URL website] AS [URL_website], [SME klasse] AS [SME_klasse], [Omzet] AS [Omzet], [StraatB] AS [StraatB], [HuisnummerB] AS [HuisnummerB], [ToevoegingB] AS [ToevoegingB], [PostcodeB] AS [PostcodeB], [PlaatsB] AS [PlaatsB], [LandB] AS [LandB], [StraatP] AS [StraatP], [HuisnummerP] AS [HuisnummerP], [ToevoegingP] AS [ToevoegingP], [PostcodeP] AS [PostcodeP], [PlaatsP] AS [PlaatsP], [LandP] AS [LandP], [GUPnr] AS [GUPnr], [GUP Naam] AS [GUP_Naam], [DUPnr] AS [DUPnr], [DUP Naam] AS [DUP_Naam], CAST([id_fi] AS bigint) AS [id_fi], CAST([Tenant] AS int) AS [Tenant], CAST([new_dt] AS bigint) AS [new_dt], CAST([upd_dt] AS bigint) AS [upd_dt] FROM [dbo].[DnB]"
+        },
+        {
+            "name": "Documenten_Docstore",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Documenten_Docstore",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_Relatie] AS bigint) AS [ID_Relatie], CAST([Viziernr] AS bigint) AS [Viziernr], CAST([DkDatum] AS int) AS [DkDatum], [DkTitel] AS [DkTitel], [Extern_systeem] AS [Extern_systeem], [GUID] AS [GUID], CAST([ID_factuur] AS bigint) AS [ID_factuur], CAST([ID_polis] AS bigint) AS [ID_polis], CAST([ID_schade] AS bigint) AS [ID_schade] FROM [dbo].[Documenten_Docstore]"
+        },
+        {
+            "name": "Interesses",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Interesses",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_Relatie] AS bigint) AS [ID_Relatie], CAST([ID_Contactpersoon] AS bigint) AS [ID_Contactpersoon], [Type] AS [Type], [Status aanmelding] AS [Status_aanmelding], [Bron] AS [Bron], CAST([Datum] AS int) AS [Datum], CAST([new_dt] AS bigint) AS [new_dt], CAST([UPD_DT] AS bigint) AS [UPD_DT], CAST([Tenant] AS int) AS [Tenant] FROM [dbo].[Interesses]"
+        },
+        {
+            "name": "Klachten",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Klachten",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([Klachtnummer] AS bigint) AS [Klachtnummer], CAST([id_relatie] AS bigint) AS [id_relatie], CAST([new_dt] AS bigint) AS [new_dt], CAST([upd_dt] AS bigint) AS [upd_dt], [Betreft] AS [Betreft], [tekst] AS [tekst], CAST([datum_ontvangst] AS int) AS [datum_ontvangst], CAST([verloopdatum] AS int) AS [verloopdatum], CAST([afhandeldatum] AS int) AS [afhandeldatum], [categorie] AS [categorie], [afdeling] AS [afdeling], [onderwerp] AS [onderwerp], [status] AS [status], [prio] AS [prio], [kanaal] AS [kanaal], [info_volmacht] AS [info_volmacht], [ingediend_door] AS [ingediend_door], [maatschappijsoort] AS [maatschappijsoort], [resultaat] AS [resultaat], CAST([Klachtencoordinator] AS int) AS [Klachtencoordinator], CAST([id_polis] AS bigint) AS [id_polis], CAST([in_behandeling_bij] AS int) AS [in_behandeling_bij] FROM [dbo].[Klachten]"
+        },
+        {
+            "name": "Medewerkers",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Medewerkers",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], [A_nummer] AS [A_nummer], [Naam] AS [Naam], [id_email1] AS [id_email1], [id_email2] AS [id_email2], [Telefoon] AS [Telefoon], [afdeling] AS [afdeling], [functie] AS [functie], [kantoor] AS [kantoor], [Leidinggevende] AS [Leidinggevende], [Voornaam] AS [Voornaam], [Voorvoegsel] AS [Voorvoegsel], [Achternaam] AS [Achternaam], [Volledige_naam] AS [Volledige_naam], [Naam2] AS [Naam2], CAST([Inactief] AS bit) AS [Inactief], CAST([Datum_uit_dienst] AS int) AS [Datum_uit_dienst], [Bedienend_team] AS [Bedienend_team], [Kantoor vinkje] AS [Kantoor_vinkje], [Klantverantwoordelijke] AS [Klantverantwoordelijke], [Schade] AS [Schade], [Pensioen] AS [Pensioen], [Zorg en Inkomen] AS [Zorg_en_Inkomen], [Klantenteam] AS [Klantenteam], [Relatiebeheerder_FI] AS [Relatiebeheerder_FI], [ANVA_team] AS [ANVA_team], [Level_team] AS [Level_team], [Schadebehandelaar] AS [Schadebehandelaar], [Accountmanager_S] AS [Accountmanager_S], [Accountmanager_ZI] AS [Accountmanager_ZI], [Accountmanager_P] AS [Accountmanager_P], [Relatiebeheerder_S] AS [Relatiebeheerder_S], [Relatiebeheerder_ZI] AS [Relatiebeheerder_ZI], [Relatiebeheerder_P] AS [Relatiebeheerder_P], [Niet beschikbaar voor gebruiker] AS [Niet_beschikbaar_voor_gebruiker], [Niet naar persoonlijke werklijst] AS [Niet_naar_persoonlijke_werklijst], [Sleutel  Werklijst ME] AS [Sleutel_Werklijst_ME], [Sleutel Bedienend team Anva] AS [Sleutel_Bedienend_team_Anva], [Sleutel Bezoekkantoor Anva] AS [Sleutel_Bezoekkantoor_Anva], [Sleutel Producent Anva] AS [Sleutel_Producent_Anva], [Sleutel Bedienend team Level] AS [Sleutel_Bedienend_team_Level], [Sleutel Bezoekkantoor Level] AS [Sleutel_Bezoekkantoor_Level], [Sleutel Producent Level] AS [Sleutel_Producent_Level], [SleutelBedienendteamAnvaIPM] AS [SleutelBedienendteamAnvaIPM], [SleutelBedienendteamAnvaConcern] AS [SleutelBedienendteamAnvaConcern], [SleutelBedienendteamAnvaAuto] AS [SleutelBedienendteamAnvaAuto], [SleutelProducentL7BenI] AS [SleutelProducentL7BenI], [SleutelProducentAnvaIPM] AS [SleutelProducentAnvaIPM], [SleutelProducentAnvaC10] AS [SleutelProducentAnvaC10], [SleutelProducentAnvaC20] AS [SleutelProducentAnvaC20], [SleutelProducentAnvaC40] AS [SleutelProducentAnvaC40], [SleutelProducentAnvaC50] AS [SleutelProducentAnvaC50], [SleutelProducentAnvaC70] AS [SleutelProducentAnvaC70], [SleutelProducentAnvaC80] AS [SleutelProducentAnvaC80], [SleutelProducentAnvaC90] AS [SleutelProducentAnvaC90], [SleutelProducentAnvaC95] AS [SleutelProducentAnvaC95], [SleutelProducentAnvaC510] AS [SleutelProducentAnvaC510], [SleutelProducentAnvaAuto] AS [SleutelProducentAnvaAuto], CAST([id_id] AS bigint) AS [id_id], CAST([id_neu] AS bigint) AS [id_neu], CAST([id_upd] AS bigint) AS [id_upd] FROM [dbo].[Medewerkers]"
+        },
+        {
+            "name": "Polissen",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Polissen",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_Relatie] AS bigint) AS [ID_Relatie], CAST([Viziernr] AS bigint) AS [Viziernr], [Relatienummer] AS [Relatienummer], [Systeem] AS [Systeem], [Intern_polisnummer] AS [Intern_polisnummer], [Polisnummer] AS [Polisnummer], [VNAB Polisnummer] AS [VNAB_Polisnummer], [Maatschappij Polisnummer] AS [Maatschappij_Polisnummer], [Kenteken] AS [Kenteken], [Polisstatus] AS [Polisstatus], [Label] AS [Label], [Collectiviteit] AS [Collectiviteit], [Collectiviteitsnummer] AS [Collectiviteitsnummer], [Maatschappijsoort] AS [Maatschappijsoort], [Maatschappij] AS [Maatschappij], [Hoofdbranche] AS [Hoofdbranche], [Branche] AS [Branche], CAST([Ingangsdatum] AS int) AS [Ingangsdatum], CAST([Hoofdvervaldatum] AS int) AS [Hoofdvervaldatum], CAST([Contractvervaldatum] AS int) AS [Contractvervaldatum], [Jaarpremie] AS [Jaarpremie], CAST([new_dt] AS bigint) AS [new_dt], CAST([upd_dt] AS bigint) AS [upd_dt], CAST([isverwijderd] AS bit) AS [isverwijderd], CAST([Wacht_aanwezig] AS bit) AS [Wacht_aanwezig], CAST([Tenant] AS int) AS [Tenant], [AWI] AS [AWI], CAST([id_pakket_polis] AS bigint) AS [id_pakket_polis] FROM [dbo].[Polissen]"
+        },
+        {
+            "name": "Producten",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Producten",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([neu] AS bigint) AS [neu], CAST([upd] AS bigint) AS [upd], [Productnaam] AS [Productnaam], [Hoofdbranche] AS [Hoofdbranche], [Branche] AS [Branche], CAST([Tenant] AS int) AS [Tenant] FROM [dbo].[Producten]"
+        },
+        {
+            "name": "Relaties",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Relaties",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([fi_id] AS bigint) AS [fi_id], CAST([Statnr] AS bigint) AS [Statnr], CAST([Viziernr] AS bigint) AS [Viziernr], [Type] AS [Type], [Relatiestatus] AS [Relatiestatus], [Relatienaam] AS [Relatienaam], [B_Straat] AS [B_Straat], [B_Huisnr] AS [B_Huisnr], [B_Huisnr_toev] AS [B_Huisnr_toev], [B_Loc_spec] AS [B_Loc_spec], [B_Postcode] AS [B_Postcode], [B_Plaats] AS [B_Plaats], [B_Land] AS [B_Land], [P_Straat] AS [P_Straat], [P_Huisnr] AS [P_Huisnr], [P_Huisnr_toev] AS [P_Huisnr_toev], [P_Loc_spec] AS [P_Loc_spec], [P_Postcode] AS [P_Postcode], [P_Plaats] AS [P_Plaats], [P_Land] AS [P_Land], [Telefoon] AS [Telefoon], [Mobiel] AS [Mobiel], [Email] AS [Email], [Taal] AS [Taal], [Rechtsvorm] AS [Rechtsvorm], [KvKnr] AS [KvKnr], [KvK_vestigingsnr] AS [KvK_vestigingsnr], [DUNSnr_tekst] AS [DUNSnr_tekst], [DUNSnr_gekoppeld] AS [DUNSnr_gekoppeld], [Geslacht] AS [Geslacht], [Aanhef] AS [Aanhef], [Adressering] AS [Adressering], [Voornaam] AS [Voornaam], [Voorletters] AS [Voorletters], [Voorvoegsel] AS [Voorvoegsel], [Achternaam] AS [Achternaam], CAST([Geboortedatum] AS int) AS [Geboortedatum], [Burgerlijke_staat] AS [Burgerlijke_staat], CAST([Nieuwdatum] AS bigint) AS [Nieuwdatum], CAST([Updatedatum] AS bigint) AS [Updatedatum], [SBI1] AS [SBI1], [UBO_status] AS [UBO_status], CAST([UBO_verloopdatum] AS int) AS [UBO_verloopdatum], CAST([Starten_UBO_onderzoek] AS bit) AS [Starten_UBO_onderzoek], [Label] AS [Label], [primair_label] AS [primair_label], [Bedrijfsonderdeel] AS [Bedrijfsonderdeel], [Klantgroep] AS [Klantgroep], [Bedieningsconcept] AS [Bedieningsconcept], [Bedienend team] AS [Bedienend_team], [Bezoekkantoor] AS [Bezoekkantoor], [Klantverantwoordelijke] AS [Klantverantwoordelijke], [Klantenteam] AS [Klantenteam], [Programma] AS [Programma], [Partner] AS [Partner], [Schadeverzekeringen] AS [Schadeverzekeringen], [Health] AS [Health], [Wealth] AS [Wealth], [Accountmanager S] AS [Accountmanager_S], [Client Consultant Health] AS [Client_Consultant_Health], [Client Consultant Wealth] AS [Client_Consultant_Wealth], [Int Accountmanager S] AS [Int_Accountmanager_S], [Desk Consultant Health] AS [Desk_Consultant_Health], [Klantcoordinator Wealth] AS [Klantcoordinator_Wealth], [Schadebehandeling] AS [Schadebehandeling], [Vaste schadebehandelaar] AS [Vaste_schadebehandelaar], [Debiteuren] AS [Debiteuren], CAST([Comm belang Totaal] AS float) AS [Comm_belang_Totaal], CAST([Comm belang A&B] AS float) AS [Comm_belang_A_B], CAST([Comm belang Volmacht] AS float) AS [Comm_belang_Volmacht], CAST([Comm belang Z&I] AS float) AS [Comm_belang_Z_I], CAST([Comm belang PLH] AS float) AS [Comm_belang_PLH], CAST([Klantomzet Totaal] AS float) AS [Klantomzet_Totaal], CAST([Comm belang Schade] AS float) AS [Comm_belang_Schade], CAST([Klantomzet Volmacht] AS float) AS [Klantomzet_Volmacht], CAST([Klantomzet ZI] AS float) AS [Klantomzet_ZI], CAST([Klantomzet AB] AS float) AS [Klantomzet_AB], CAST([Klantomzet PLH] AS float) AS [Klantomzet_PLH], CAST([Klantomzet Schade] AS float) AS [Klantomzet_Schade], [Segment] AS [Segment], CAST([Ultieme_moeder_id] AS bigint) AS [Ultieme_moeder_id], CAST([CUP_id] AS bigint) AS [CUP_id], CAST([ID_DnB] AS bigint) AS [ID_DnB], CAST([Tenant] AS int) AS [Tenant], [verzendwijze] AS [verzendwijze], [collectiviteit] AS [collectiviteit], CAST([collectiviteit_partner] AS bit) AS [collectiviteit_partner], CAST([overlijdensdatum_gemeld] AS int) AS [overlijdensdatum_gemeld], CAST([overlijdensdatum] AS int) AS [overlijdensdatum], CAST([datum_logisch_verwijderd] AS int) AS [datum_logisch_verwijderd] FROM [dbo].[Relaties]"
+        },
+        {
+            "name": "Retenties",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Retenties",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([id_relatie] AS bigint) AS [id_relatie], CAST([id_contactmoment] AS bigint) AS [id_contactmoment], CAST([id_polis] AS bigint) AS [id_polis], CAST([Datum] AS int) AS [Datum], [Behouden] AS [Behouden], [Reden opzegging] AS [Reden_opzegging], [Kanaal] AS [Kanaal], [Atlasbrief ontvangen] AS [Atlasbrief_ontvangen], [Nieuwe partij] AS [Nieuwe_partij], [Opmerkingen] AS [Opmerkingen], [Verantwoordelijke] AS [Verantwoordelijke], [Korting aangeboden] AS [Korting_aangeboden], [Actie aangeboden] AS [Actie_aangeboden], CAST([new_dt] AS bigint) AS [new_dt], CAST([UPD_DT] AS bigint) AS [UPD_DT], CAST([Tenant] AS int) AS [Tenant] FROM [dbo].[Retenties]"
+        },
+        {
+            "name": "Sales",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Sales",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([id_relatie] AS bigint) AS [id_relatie], CAST([id_contactmoment] AS bigint) AS [id_contactmoment], CAST([id_polis] AS bigint) AS [id_polis], [Product] AS [Product], [Verantwoordelijke] AS [Verantwoordelijke], CAST([Datum] AS int) AS [Datum], [Onderwerp] AS [Onderwerp], CAST([Jaarpremie] AS float) AS [Jaarpremie], [Opmerkingen] AS [Opmerkingen], [Kanaal] AS [Kanaal], CAST([new_dt] AS bigint) AS [new_dt], CAST([UPD_DT] AS bigint) AS [UPD_DT], CAST([Tenant] AS int) AS [Tenant] FROM [dbo].[Sales]"
+        },
+        {
+            "name": "Schades",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Schades",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_Relatie] AS bigint) AS [ID_Relatie], CAST([ID_Polis] AS bigint) AS [ID_Polis], CAST([Viziernr] AS bigint) AS [Viziernr], [Relatienummer] AS [Relatienummer], [ExterneIdentifier Bron] AS [ExterneIdentifier_Bron], [ExterneIdentifier] AS [ExterneIdentifier], [Polisnummer] AS [Polisnummer], [Schadenummer] AS [Schadenummer], [Soort schade] AS [Soort_schade], [Label] AS [Label], [Status] AS [Status], CAST([Schadedatum] AS int) AS [Schadedatum], CAST([Aanmeld datum] AS int) AS [Aanmeld_datum], [Hoofdbranche] AS [Hoofdbranche], [Branche] AS [Branche], [Afdeling] AS [Afdeling], [Maatschappij] AS [Maatschappij], [Maatschappijsoort] AS [Maatschappijsoort], [Kenteken] AS [Kenteken], [Schadesoort] AS [Schadesoort], [Poliskey] AS [Poliskey], CAST([IsVerwijderd] AS bit) AS [IsVerwijderd], CAST([Afgehandeld] AS bit) AS [Afgehandeld], CAST([Terugval] AS bit) AS [Terugval], CAST([Schuldschade] AS bit) AS [Schuldschade], CAST([Letselschade] AS bit) AS [Letselschade], [Behandelaarscode] AS [Behandelaarscode], [Poliskenmerk] AS [Poliskenmerk], [StatusCode] AS [StatusCode], [SchadesoortCode] AS [SchadesoortCode], [Hoofdbranchecode] AS [Hoofdbranchecode], [Branchecode] AS [Branchecode], [Maatschappijcode] AS [Maatschappijcode], [Maatschappijsoortcode] AS [Maatschappijsoortcode], [Afdelingscode] AS [Afdelingscode], [Wijzigingsreden] AS [Wijzigingsreden], [Wijzigingsredencode] AS [Wijzigingsredencode], CAST([new_dt] AS bigint) AS [new_dt], CAST([upd_dt] AS bigint) AS [upd_dt], CAST([Tenant] AS int) AS [Tenant] FROM [dbo].[Schades]"
+        },
+        {
+            "name": "Sleutels",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Sleutels",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_Relatie] AS bigint) AS [ID_Relatie], CAST([Extsystem_code] AS int) AS [Extsystem_code], [Extsystem] AS [Extsystem], [Sleutel] AS [Sleutel], [Label] AS [Label], CAST([Primair] AS bit) AS [Primair], CAST([Actief_anva_auto] AS bit) AS [Actief_anva_auto], CAST([neu] AS bigint) AS [neu], CAST([upd] AS bigint) AS [upd] FROM [dbo].[Sleutels]"
+        },
+        {
+            "name": "Taken",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Taken",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_Relatie] AS bigint) AS [ID_Relatie], CAST([ID_Relatie_bron] AS bigint) AS [ID_Relatie_bron], CAST([ID_Relatie_doel] AS bigint) AS [ID_Relatie_doel], CAST([ID_Relatie_nieuw] AS bigint) AS [ID_Relatie_nieuw], CAST([ID_voorgaande_taak] AS bigint) AS [ID_voorgaande_taak], CAST([ID_starttaak] AS bigint) AS [ID_starttaak], CAST([ID_takentemplate] AS bigint) AS [ID_takentemplate], CAST([ID_Product] AS bigint) AS [ID_Product], [LinkTyp] AS [LinkTyp], CAST([ID_GENERIC] AS bigint) AS [ID_GENERIC], CAST([neu] AS bigint) AS [neu], CAST([upd] AS bigint) AS [upd], CAST([Datum_afgehandeld] AS bigint) AS [Datum_afgehandeld], CAST([startdatum] AS bigint) AS [startdatum], CAST([Duur in dagen] AS int) AS [Duur_in_dagen], [betreft] AS [betreft], [Taaksoort] AS [Taaksoort], CAST([taakstatus_code] AS smallint) AS [taakstatus_code], [taakstatus] AS [taakstatus], [Prioriteit] AS [Prioriteit], CAST([ID_aangemaakt_door] AS int) AS [ID_aangemaakt_door], [aangemaakt_door] AS [aangemaakt_door], CAST([ID_Verantwoordelijk] AS int) AS [ID_Verantwoordelijk], [verantwoordelijk] AS [verantwoordelijk], CAST([Tenant] AS int) AS [Tenant], [proces] AS [proces], CAST([einddatum] AS bigint) AS [einddatum] FROM [dbo].[Taken]"
+        },
+        {
+            "name": "UBO_Onderzoeken",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "UBO_Onderzoeken",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([ID_Relatie] AS bigint) AS [ID_Relatie], CAST([Extsystem_code] AS int) AS [Extsystem_code], [Extsystem] AS [Extsystem], [Sleutel] AS [Sleutel], [UBO_status] AS [UBO_status], CAST([NEW_DT] AS bigint) AS [NEW_DT], CAST([UPD_DT] AS bigint) AS [UPD_DT], CAST([Datum start VNAB] AS bigint) AS [Datum_start_VNAB], CAST([Tijd start VNAB] AS bigint) AS [Tijd_start_VNAB], CAST([Datum afgerond VNAB] AS bigint) AS [Datum_afgerond_VNAB], CAST([Tijd afgerond VNAB] AS bigint) AS [Tijd_afgerond_VNAB], CAST([UBO verloopt op] AS int) AS [UBO_verloopt_op], [Status VNAB onderzoek] AS [Status_VNAB_onderzoek], CAST([Datum_afgebroken] AS bigint) AS [Datum_afgebroken], CAST([Tijd_afgebroken] AS bigint) AS [Tijd_afgebroken] FROM [dbo].[UBO_Onderzoeken]"
+        },
+        {
+            "name": "Verkoopkansen",
+            "enabled": true,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "Verkoopkansen",
+            "base_query": "SELECT CAST([ID] AS bigint) AS [ID], CAST([id_relatie] AS bigint) AS [id_relatie], CAST([datum_afsluiting] AS int) AS [datum_afsluiting], [status] AS [status], [fase] AS [fase], [sales_fase] AS [sales_fase], [stepid] AS [stepid], CAST([WFT_dossier] AS int) AS [WFT_dossier], [productgroep] AS [productgroep], [product] AS [product], [actie] AS [actie], CAST([campagne_sleutel] AS bigint) AS [campagne_sleutel], [campagne_naam] AS [campagne_naam], [type_business] AS [type_business], [advies_bemiddeling] AS [advies_bemiddeling], CAST([verwachte_ingangsdatum] AS int) AS [verwachte_ingangsdatum], [adviseur] AS [adviseur], [kantoor] AS [kantoor], [binnendienst] AS [binnendienst], CAST([neu] AS bigint) AS [neu], CAST([upd] AS bigint) AS [upd], [reden_omschrijving] AS [reden_omschrijving], CAST([vraag1] AS bit) AS [vraag1], CAST([vraag2] AS bit) AS [vraag2], CAST([vraag3] AS bit) AS [vraag3], CAST([vraag4] AS bit) AS [vraag4], CAST([vraag5] AS bit) AS [vraag5], CAST([vraag6] AS bit) AS [vraag6], CAST([vraag7] AS bit) AS [vraag7], CAST([vraag8] AS bit) AS [vraag8], CAST([vraag9] AS bit) AS [vraag9], CAST([vraag10] AS bit) AS [vraag10], CAST([vraag11] AS bit) AS [vraag11], CAST([mustwin] AS bit) AS [mustwin], CAST([Premie_leenbedrag] AS float) AS [Premie_leenbedrag], CAST([Tekencommissie] AS float) AS [Tekencommissie], CAST([Incassoprovisie] AS float) AS [Incassoprovisie], CAST([Volmacht] AS bit) AS [Volmacht], CAST([Fee_eenmalig] AS float) AS [Fee_eenmalig], CAST([Fee_doorlopend] AS float) AS [Fee_doorlopend], CAST([Gewogen_waarde] AS float) AS [Gewogen_waarde], CAST([negatieve_verkoopkans] AS int) AS [negatieve_verkoopkans], [aangemaakt_door] AS [aangemaakt_door], [Polis] AS [Polis], [Identiteitsbewijs] AS [Identiteitsbewijs], CAST([Inventarisatieformulier advies] AS int) AS [Inventarisatieformulier_advies], CAST([Inventarisatieformulier EO] AS int) AS [Inventarisatieformulier_EO], CAST([Datum aanbiedingsbrief] AS int) AS [Datum_aanbiedingsbrief], [Anders] AS [Anders], [Serviceabonnement] AS [Serviceabonnement], CAST([Begin serviceabonnement] AS int) AS [Begin_serviceabonnement], CAST([Eind serviceabonnement] AS int) AS [Eind_serviceabonnement], CAST([Getekend aanvraagformulier] AS int) AS [Getekend_aanvraagformulier], CAST([Getekend adviesrapport] AS int) AS [Getekend_adviesrapport], [Leadgenerator] AS [Leadgenerator], CAST([Ondersteuning] AS bit) AS [Ondersteuning], CAST([KM_251_statnr] AS bigint) AS [KM_251_statnr], CAST([KM_251_volgnr] AS bigint) AS [KM_251_volgnr], CAST([aanvraag ORV] AS int) AS [aanvraag_ORV], CAST([Financial Planning] AS bit) AS [Financial_Planning], [Resultaat] AS [Resultaat] FROM [dbo].[Verkoopkansen]"
+        }
+    ]
+}

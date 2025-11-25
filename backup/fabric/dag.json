@@ -1,0 +1,64 @@
+{
+    "source": "anva_concern",
+    "run_date_utc": null,
+    "watermarks_path": "config/watermarks.json",
+	"base_files" : "greenhouse_sources",
+	"connection_name": "connection_anva_concern_prod",
+    "defaults": {
+        "concurrency_large": 2,
+        "concurrency_small": 8,
+        "max_rows_per_file_large": 15000000,
+        "max_rows_per_file_small": 1000000
+    },
+    "tables": [
+        {
+            "name": "Fact_PremieFacturen",
+			"enabled" : 0,
+            "size_class": "XL",
+            "load_mode": "window_replace",
+            "delta_table": "silver.bigfact",
+            "base_query": "SELECT CAST(Factuurnummer as nvarchar(4)) as [Factuurnummer], CAST(Maatschappij_Id as nvarchar(2)) as [Maatschappij_Id], CAST(MaatschappijSoort as nvarchar(2)) as [MaatschappijSoort], CAST(DetailMaatschappij_Id as nvarchar(2)) as [DetailMaatschappij_Id], CAST(FactuurSoort_Id as nvarchar(2)) as [FactuurSoort_Id], CAST(Relatie_Id as int) as [Relatie_Id], CAST(Volgnummer as nvarchar(2)) as [Volgnummer], CAST(VolgnummerSub as int) as [VolgnummerSub], CAST(VolgnummerHistorie as int) as [VolgnummerHistorie], CAST(Is_DetailAanwezig as bit) as [Is_DetailAanwezig], CAST(Is_FinancieelVerwerkt as bit) as [Is_FinancieelVerwerkt], CAST(Is_TerugboekProlongatie as bit) as [Is_TerugboekProlongatie], CAST(Is_Openstaand as bit) as [Is_Openstaand], CAST(Hoofdbranche_Id as nvarchar(2)) as [Hoofdbranche_Id], CAST(Branche_Id as nvarchar(2)) as [Branche_Id], CAST(DekkingCode_Id as nvarchar(2)) as [DekkingCode_Id], CAST(Kantoor_Id as nvarchar(2)) as [Kantoor_Id], CAST(Medewerker_Id as nvarchar(5)) as [Medewerker_Id], CAST(Incassowijze_Id as nvarchar(2)) as [Incassowijze_Id], CAST(Termijn as int) as [Termijn], CAST(Agent_Id as nvarchar(2)) as [Agent_Id], CAST(Polisnummer as nvarchar(10)) as [Polisnummer], CAST(Polis_Id as nvarchar(12)) as [Polis_Id], CAST(Kenteken as nvarchar(5)) as [Kenteken], CAST(VerzekerdeSom as float) as [VerzekerdeSom], CAST(BonusMalus_Percentage as float) as [BonusMalus_Percentage], CAST(FactuurTekst as nvarchar(40)) as [FactuurTekst], CAST(Collectiviteit_Id as nvarchar(2)) as [Collectiviteit_Id], CAST(PolisProducent_Id as nvarchar(2)) as [PolisProducent_Id], CAST(Factuur_Datum as date) as [Factuur_Datum], CAST(Boek_Datum as date) as [Boek_Datum], CAST(Verval_Datum as date) as [Verval_Datum], CAST(IngangWijziging_Datum as date) as [IngangWijziging_Datum], CAST(Is_WachtBoeking as bit) as [Is_WachtBoeking], CAST(WijzigingReden_Id as nvarchar(2)) as [WijzigingReden_Id], CAST(IncassoBedrag as float) as [IncassoBedrag], CAST(NettoMaatschappij as float) as [NettoMaatschappij], CAST(NettoAgent as float) as [NettoAgent], CAST(PremieNetto as float) as [PremieNetto], CAST(PremieBruto as float) as [PremieBruto], CAST(BonusMalus_Bedrag as float) as [BonusMalus_Bedrag], CAST(TussenpersoonKosten as float) as [TussenpersoonKosten], CAST(MaatschappijKosten as float) as [MaatschappijKosten], CAST(AssurantieBelasting as float) as [AssurantieBelasting], CAST(TermijnToeslagBedrag as float) as [TermijnToeslagBedrag], CAST(RetourProvisie as float) as [RetourProvisie], CAST(PakketKortingBedrag as float) as [PakketKortingBedrag], CAST(CollectiviteitKortingBedrag as float) as [CollectiviteitKortingBedrag], CAST(ToeslagBedrag as float) as [ToeslagBedrag], CAST(IncassoProvisie as float) as [IncassoProvisie], CAST(VolmachtBeloning as float) as [VolmachtBeloning], CAST(AfsluitProvisie as float) as [AfsluitProvisie], CAST(BonusProvisie as float) as [BonusProvisie], CAST(ZelfWerkProvisie as float) as [ZelfWerkProvisie], CAST(AgentProvisie as float) as [AgentProvisie], CAST(AgentKosten as float) as [AgentKosten], CAST(IncassoBedrag_ExclBTW as float) as [IncassoBedrag_ExclBTW], CAST(BTW_Id as nvarchar(2)) as [BTW_Id], CAST(BTW_Bedrag as float) as [BTW_Bedrag], CAST(Tekenjaar as int) as [Tekenjaar], CAST(BoekingSoort as varchar) as [BoekingSoort], CAST(VervalDatum_Herrekend as date) as [VervalDatum_Herrekend], CAST(Percentage_Aandeel as float) as [Percentage_Aandeel], CAST(Verzekeringsvorm_Id as nvarchar(2)) as [Verzekeringsvorm_Id] FROM [pbi].[Fact_PremieFacturen]",
+            "window": {
+                "column": "Boek_Datum",
+                "granularity": "month",
+                "lookback_months": 1,
+                "late_arrival_facts": 1
+            },
+            "partitioning": {
+                "type": "year_month",
+                "year_col": "p_year",
+                "month_col": "p_month"
+            },
+            "zorder": [
+                "BusinessKey"
+            ],
+            "concurrency": 3,
+            "max_rows_per_file": 20000000
+        },
+        {
+            "name": "Dim_Relatie",
+			"enabled" : 0,
+            "size_class": "M",
+            "load_mode": "incremental",
+            "delta_table": "silver.Dim_Relatie",
+            "base_query": "SELECT CAST(Relatie_Id as int) as [Relatie_Id], CAST(Hoofdrelatie_Id as nvarchar(127)) as [Hoofdrelatie_Id], CAST(Hoofdrelatie as nvarchar(23)) as [Hoofdrelatie], CAST(HoofdrelatieNaam as nvarchar(17)) as [HoofdrelatieNaam], CAST(Is_Hoofdrelatie as bit) as [Is_Hoofdrelatie], CAST(Kantoor_Id as nvarchar(2)) as [Kantoor_Id], CAST(Relatie as nvarchar(23)) as [Relatie], CAST(RelatieSoort_Id as nvarchar(2)) as [RelatieSoort_Id], CAST(Is_RCRelatie as bit) as [Is_RCRelatie], CAST(RelatieProducent_Id as nvarchar(2)) as [RelatieProducent_Id], CAST(Agent as nvarchar(21)) as [Agent], CAST(NaamSamengesteld as nvarchar(28)) as [NaamSamengesteld], CAST(RelatieNaam as nvarchar(17)) as [RelatieNaam], CAST(Voorletters as nvarchar(5)) as [Voorletters], CAST(Voorvoegsels as nvarchar(5)) as [Voorvoegsels], CAST(Email as nvarchar(30)) as [Email], CAST(Straat as nvarchar(17)) as [Straat], CAST(HuisnummerToevoeging as nvarchar(5)) as [HuisnummerToevoeging], CAST(Postcode as nvarchar(3)) as [Postcode], CAST(Huisnummer as float) as [Huisnummer], CAST(Plaats as nvarchar(17)) as [Plaats], CAST(Land as varchar) as [Land], CAST(PC1 as nvarchar(0)) as [PC1], CAST(PC2 as nvarchar(1)) as [PC2], CAST(PC3 as nvarchar(1)) as [PC3], CAST(PC4 as nvarchar(2)) as [PC4], CAST(Introductie_Datum as date) as [Introductie_Datum], CAST(Is_Vervallen as bit) as [Is_Vervallen], CAST(Is_FoutiefActief as bit) as [Is_FoutiefActief], CAST(Is_VerwijzendeRelatieAanwezig as bit) as [Is_VerwijzendeRelatieAanwezig], CAST(LaatsteWijzigings_Datum as date) as [LaatsteWijzigings_Datum], CAST(Royements_Datum as date) as [Royements_Datum], CAST(RelatieduurInMaanden as int) as [RelatieduurInMaanden], CAST(Belang as nvarchar(35)) as [Belang], CAST(Relatiebeheerder as nvarchar(28)) as [Relatiebeheerder], CAST(HerkomstRelatie as nvarchar(39)) as [HerkomstRelatie], CAST(Zoeksleutel as nvarchar(5)) as [Zoeksleutel], CAST(Incassowijze_Id as nvarchar(2)) as [Incassowijze_Id], CAST(IBAN_Bank as nvarchar(25)) as [IBAN_Bank], CAST(IBAN_Giro as nvarchar(25)) as [IBAN_Giro] FROM [pbi].[Dim_Relatie]",
+            "incremental": {
+                "column": "LaatsteWijzigings_Datum",
+                "type": "date"
+            },
+            "business_keys": [
+                "Relatie_Id"
+            ]
+        },
+        {
+            "name": "Dim_SBICode",
+			"enabled" : 0,
+            "size_class": "S",
+            "load_mode": "snapshot",
+            "delta_table": "silver.Dim_SBICode",
+            "base_query": "SELECT CAST(SBI_Id as nvarchar(3)) as [SBI_Id], CAST(SBI_Omschrijving as nvarchar(75)) as [SBI_Omschrijving], CAST(SBI as nvarchar(79)) as [SBI] FROM [pbi].[Dim_SBICode]",
+            "single_file": true,
+            "sync_deletes": true
+        }
+    ]
+}

@@ -1,0 +1,9 @@
+[
+  { "source": "ccs_level",       "time": "06:00", "days": "week",    "config": "config/dag_css_level_week.json" },
+  { "source": "anva_meeus",      "time": "20:30", "days": "week",    "config": "config/dag_anva_meeus_week.json" },
+  { "source": "vizier",          "time": "06:00", "days": "weekday", "config": "config/dag_vizier_weekday.json" },
+  { "source": "vizier",          "time": "06:00", "days": "weekend", "config": "config/dag_vizier_weekend.json" },
+  { "source": "ods_reports",     "time": "09:00", "days": "week",    "config": "config/dag_ods_reports_week.json" },
+  { "source": "anva_concern",    "time": "21:00", "days": "week",    "config": "config/dag_anva_concern_week.json" },
+  { "source": "insurance_data_im","time":"07:00", "days": "week",    "config": "config/dag_insurance_data_im_week.json" }
+]
