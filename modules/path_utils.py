@@ -19,7 +19,7 @@ from typing import Optional, List
 from pathlib import Path
 from pyspark.sql import SparkSession
 
-CLUSTER_FILES_ROOT  = "/data/lakehouse/gh_b_avd/lh_gh_bronze"
+CLUSTER_FILES_ROOT  = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
 
 # ============================================================================
 # ENVIRONMENT DETECTION
