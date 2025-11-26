@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Path Resolution Utilities for Bronze Pipeline
 
@@ -16,7 +17,9 @@ Date: 2025-11-25
 import os
 from typing import Optional, List
 from pathlib import Path
+from pyspark.sql import SparkSession
 
+CLUSTER_FILES_ROOT  = "/data/lakehouse/gh_b_avd/lh_gh_bronze"
 
 # ============================================================================
 # ENVIRONMENT DETECTION
@@ -61,11 +64,12 @@ def get_base_path() -> str:
 def build_parquet_dir(base_files: str,
                       source_name: str,
                       run_ts: str,
-                      table_name: str) -> str:
+                      table_name: str,
+                      spark: SparkSession) -> str:
     """
     Build the directory path for parquet files of a single table and run_ts.
     
-    Path structure: {BASE_PATH}/{base_files}/{source}/year/month/day/{run_ts}/{table}
+    Path structure: {base_files}/{source}/year/month/day/{run_ts}/{table}
     
     Args:
         base_files: Base folder name (e.g., 'greenhouse_sources')
@@ -97,9 +101,12 @@ def build_parquet_dir(base_files: str,
     day = run_ts[6:8]
     
     # Get environment-specific base path
-    base_path = get_base_path()
+    #base_path = get_base_path()
+    #return f"{base_path}/{base_files}/{source_name}/{year}/{month}/{day}/{run_ts}/{table_name}"
     
-    return f"{base_path}/{base_files}/{source_name}/{year}/{month}/{day}/{run_ts}/{table_name}"
+    # Logical path, like in Fabric
+    relative_dir = f"Files/{base_files}/{source_name}/{year}/{month}/{day}/{run_ts}/{table_name}"
+    return resolve_files_path(relative_dir, spark)
 
 
 def build_parquet_glob(base_files: str,
@@ -352,6 +359,53 @@ def validate_run_ts_format(run_ts: str) -> bool:
     except:
         return False
 
+# ============================================================================
+# FILES PATH RESOLUTION
+# ============================================================================
+
+def _is_fabric(spark: SparkSession) -> bool:
+    """
+    Probeer te bepalen of we in Fabric draaien.
+
+    In Fabric hoort de config key 'spark.microsoft.fabric.workspaceId'
+    aanwezig te zijn. Bestaat die key niet, dan gooien we een exceptie
+    en nemen we aan dat we NIET in Fabric zitten.
+    """
+    try:
+        _ = spark.conf.get("spark.microsoft.fabric.workspaceId")
+        return True
+    except Exception:
+        return False
+
+def resolve_files_path(relative: str, spark: SparkSession) -> str:
+    """
+    Neem een pad binnen de lakehouse (zoals 'Files/...' of 'Files')
+    en geef het juiste fysieke pad terug voor de huidige omgeving.
+
+    - In Fabric:  'Files/...'
+    - Op je cluster: '/data/lakehouse/gh_b_avd/lh_gh_bronze/Files/...'
+    """
+
+    # leading slash weghalen ("/Files/..." -> "Files/...")
+    if relative.startswith("/"):
+        relative = relative[1:]
+
+    # We verwachten hier altijd iets met "Files"
+    if not relative.startswith("Files"):
+        # Onverwacht gebruik: geef het dan gewoon door
+        return relative
+
+    if _is_fabric(spark):
+        # Spark in Fabric verwacht direct 'Files/...'
+        return relative
+
+    # Cluster: map 'Files' naar jouw NFS-root
+    if relative == "Files":
+        return CLUSTER_FILES_ROOT
+
+    # 'Files/...' -> '/data/lakehouse/.../Files/...'
+    suffix = relative[len("Files/"):]
+    return f"{CLUSTER_FILES_ROOT}/{suffix}"
 
 # ============================================================================
 # MODULE INFO
