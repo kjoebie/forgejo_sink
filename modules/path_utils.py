@@ -427,41 +427,41 @@ def get_module_info() -> dict:
     }
 
 
-if __name__ == "__main__":
-    # Self-test when run directly
-    print("=" * 80)
-    print("path_utils.py - Self Test")
-    print("=" * 80)
+# if __name__ == "__main__":
+#     # Self-test when run directly
+#     print("=" * 80)
+#     print("path_utils.py - Self Test")
+#     print("=" * 80)
     
-    info = get_module_info()
-    for key, value in info.items():
-        print(f"{key:15}: {value}")
+#     info = get_module_info()
+#     for key, value in info.items():
+#         print(f"{key:15}: {value}")
     
-    print("=" * 80)
-    print("Example Path Outputs:")
-    print("=" * 80)
+#     print("=" * 80)
+#     print("Example Path Outputs:")
+#     print("=" * 80)
     
-    # Test paths
-    test_run_ts = "20251125T060000"
-    test_source = "anva_concern"
-    test_table = "Dim_Relatie"
-    test_base_files = "greenhouse_sources"
+#     # Test paths
+#     test_run_ts = "20251125T060000"
+#     test_source = "anva_concern"
+#     test_table = "Dim_Relatie"
+#     test_base_files = "greenhouse_sources"
     
-    print(f"\nParquet directory:")
-    print(f"  {build_parquet_dir(test_base_files, test_source, test_run_ts, test_table)}")
+#     print(f"\nParquet directory:")
+#     print(f"  {build_parquet_dir(test_base_files, test_source, test_run_ts, test_table, spark)}")
     
-    print(f"\nParquet glob:")
-    print(f"  {build_parquet_glob(test_base_files, test_source, test_run_ts, test_table)}")
+#     print(f"\nParquet glob:")
+#     print(f"  {build_parquet_glob(test_base_files, test_source, test_run_ts, test_table, spark)}")
     
-    print(f"\nDelta table name:")
-    print(f"  {build_delta_table_name('bronze', test_table)}")
+#     print(f"\nDelta table name:")
+#     print(f"  {build_delta_table_name('bronze', test_table)}")
     
-    print(f"\nWatermark folder:")
-    print(f"  {build_watermark_folder(test_source, test_run_ts)}")
+#     print(f"\nWatermark folder:")
+#     print(f"  {build_watermark_folder(test_source, test_run_ts)}")
     
-    print(f"\nConfig path:")
-    print(f"  {build_config_path('config/dag_anva_concern_week.json')}")
+#     print(f"\nConfig path:")
+#     print(f"  {build_config_path('config/dag_anva_concern_week.json')}")
     
-    print("\n" + "=" * 80)
-    print("✓ Self test complete")
-    print("=" * 80)
+#     print("\n" + "=" * 80)
+#     print("✓ Self test complete")
+#     print("=" * 80)
