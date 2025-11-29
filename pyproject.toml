@@ -12,3 +12,8 @@ dependencies = [
     "pyarrow>=15.0.0,<16.0.0",
     "pyiceberg>=0.7.0",
 ]
+
+[dependency-groups]
+dev = [
+    "nbstripout>=0.8.2",
+]
