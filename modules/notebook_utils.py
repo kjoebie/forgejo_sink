@@ -13,13 +13,12 @@ from typing import Optional, Dict, Any
 
 import papermill as pm
 
+from modules.logging_utils import configure_logging
+
+log_file = configure_logging(run_name="notebook_runner")
 logger = logging.getLogger(__name__)
 
-if not logging.getLogger().hasHandlers():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] - %(message)s",
-    )
+logger.info("Logbestanden worden weggeschreven naar: %s", log_file)
 
 
 class NotebookRunner:

@@ -19,13 +19,10 @@ import os
 from typing import Optional, List
 from pyspark.sql import SparkSession
 
-logger = logging.getLogger(__name__)
+from modules.logging_utils import configure_logging
 
-if not logging.getLogger().hasHandlers():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] - %(message)s",
-    )
+configure_logging(run_name="path_utils")
+logger = logging.getLogger(__name__)
 
 CLUSTER_FILES_ROOT  = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
 
