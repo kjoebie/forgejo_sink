@@ -1,0 +1,35 @@
+name: Notebook Tests
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+
+jobs:
+  notebook-tests:
+    name: Notebook test suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+
+      - name: Sync dependencies
+        run: uv sync --dev
+
+      - name: Run notebook tests
+        run: |
+          set -o pipefail
+          mkdir -p .artifacts
+          uv run pytest -m "notebook" --junitxml=.artifacts/notebook-tests.xml | tee .artifacts/notebook-tests.log
+
+      - name: Upload notebook artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notebook-tests
+          path: .artifacts
