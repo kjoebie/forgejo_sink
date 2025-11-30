@@ -30,10 +30,32 @@ CLUSTER_FILES_ROOT  = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
 # ENVIRONMENT DETECTION
 # ============================================================================
 
-def detect_environment() -> str:
+def _is_fabric_from_spark(spark: Optional[SparkSession]) -> bool:
+    """
+    Detect Fabric via Spark configuration if available.
+
+    Args:
+        spark: Optional SparkSession
+
+    Returns:
+        bool: True when the Fabric workspace config key is present
+    """
+    if spark is None:
+        return False
+
+    try:
+        return bool(spark.conf.get("spark.microsoft.fabric.workspaceId"))
+    except Exception:
+        return False
+
+
+def detect_environment(spark: Optional[SparkSession] = None) -> str:
     """
     Detect runtime environment (Fabric or Local).
-    
+
+    Checks Spark configuration first (when provided) and falls back to
+    filesystem heuristics for notebook/local execution without Spark.
+
     Returns:
         str: 'fabric' if running in Microsoft Fabric, 'local' otherwise
     
@@ -42,15 +64,18 @@ def detect_environment() -> str:
         >>> logger.info(f"Running in: {env}")
         Running in: local
     """
-    if os.path.exists('/lakehouse/default'):
+    if _is_fabric_from_spark(spark) or os.path.exists('/lakehouse/default'):
         return 'fabric'
     return 'local'
 
 
-def get_base_path() -> str:
+def get_base_path(spark: Optional[SparkSession] = None) -> str:
     """
     Get the base path for Files storage based on environment.
-    
+
+    Args:
+        spark: Optional SparkSession to support Fabric detection via Spark conf
+
     Returns:
         str: '/lakehouse/default/Files' for Fabric, 'Files' for Local
     
@@ -59,7 +84,7 @@ def get_base_path() -> str:
         >>> logger.info(f"Base path: {base}")
         Base path: Files
     """
-    return '/lakehouse/default/Files' if detect_environment() == 'fabric' else 'Files'
+    return '/lakehouse/default/Files' if detect_environment(spark) == 'fabric' else 'Files'
 
 
 # ============================================================================
@@ -70,7 +95,7 @@ def build_parquet_dir(base_files: str,
                       source_name: str,
                       run_ts: str,
                       table_name: str,
-                      spark: SparkSession) -> str:
+                      spark: Optional[SparkSession] = None) -> str:
     """
     Build the directory path for parquet files of a single table and run_ts.
     
@@ -81,6 +106,7 @@ def build_parquet_dir(base_files: str,
         source_name: Source system name (e.g., 'anva_concern')
         run_ts: Run timestamp in format yyyymmddThhmmss (e.g., '20251125T060000')
         table_name: Table name (e.g., 'Dim_Relatie')
+        spark: Optional SparkSession used for Fabric detection
     
     Returns:
         str: Full path to parquet directory
@@ -368,21 +394,7 @@ def validate_run_ts_format(run_ts: str) -> bool:
 # FILES PATH RESOLUTION
 # ============================================================================
 
-def _is_fabric(spark: SparkSession) -> bool:
-    """
-    Probeer te bepalen of we in Fabric draaien.
-
-    In Fabric hoort de config key 'spark.microsoft.fabric.workspaceId'
-    aanwezig te zijn. Bestaat die key niet, dan gooien we een exceptie
-    en nemen we aan dat we NIET in Fabric zitten.
-    """
-    try:
-        _ = spark.conf.get("spark.microsoft.fabric.workspaceId")
-        return True
-    except Exception:
-        return False
-
-def resolve_files_path(relative: str, spark: SparkSession) -> str:
+def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> str:
     """
     Neem een pad binnen de lakehouse (zoals 'Files/...' of 'Files')
     en geef het juiste fysieke pad terug voor de huidige omgeving.
@@ -400,7 +412,7 @@ def resolve_files_path(relative: str, spark: SparkSession) -> str:
         # Onverwacht gebruik: geef het dan gewoon door
         return relative
 
-    if _is_fabric(spark):
+    if detect_environment(spark) == 'fabric':
         # Spark in Fabric verwacht direct 'Files/...'
         return relative
 
