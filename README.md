@@ -93,6 +93,11 @@ dwh_spark_processing/
 └── pyproject.toml     # Dependencies
 ```
 
+## ✅ Tests draaien
+
+- Snelle checks: `python -m pytest tests -m "unit or integration"`
+- Notebook-tests apart draaien: `python -m pytest tests -m notebook`
+
 ## 🔄 Workflow
 
 1. **Feature branch**: `git checkout -b feature/my-feature`
