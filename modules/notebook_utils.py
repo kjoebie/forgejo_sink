@@ -9,16 +9,13 @@ import logging
 import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 
 import papermill as pm
 
 from modules.logging_utils import configure_logging
 
-log_file = configure_logging(run_name="notebook_runner")
 logger = logging.getLogger(__name__)
-
-logger.info("Logbestanden worden weggeschreven naar: %s", log_file)
 
 
 class NotebookRunner:
@@ -29,17 +26,19 @@ class NotebookRunner:
     
     @staticmethod
     def run(
-        notebook_path: str, 
+        notebook_path: str,
         timeout_seconds: int = 3600,
-        arguments: Optional[Dict[str, Any]] = None
+        arguments: Optional[Dict[str, Any]] = None,
+        output_dir: Optional[Union[str, Path]] = None,
     ) -> str:
         """
         Voer een notebook uit met parameters (zoals Fabric mssparkutils.notebook.run)
-        
+
         Args:
             notebook_path: Pad naar notebook (relatief of absoluut, met of zonder .ipynb)
             timeout_seconds: Timeout in seconden
             arguments: Dictionary met parameters voor notebook
+            output_dir: Optioneel pad om notebook outputs in te schrijven (voor tests/CI)
             
         Returns:
             JSON string met resultaat (compatible met Fabric format)
@@ -54,6 +53,14 @@ class NotebookRunner:
                 }
             )
         """
+        log_file = configure_logging(run_name="notebook_runner")
+
+        output_base_dir = Path(output_dir) if output_dir else Path('notebook_outputs')
+        output_base_dir.mkdir(parents=True, exist_ok=True)
+        logger.info("Notebook outputs directory: %s", output_base_dir.resolve())
+
+        logger.info("Logbestanden worden weggeschreven naar: %s", log_file.resolve())
+
         # Converteer naar .ipynb pad als extensie ontbreekt
         if not notebook_path.endswith('.ipynb'):
             notebook_path = f"{notebook_path}.ipynb"
@@ -74,21 +81,21 @@ class NotebookRunner:
         
         # Output notebook met timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_dir = Path('notebook_outputs')
-        output_dir.mkdir(exist_ok=True)
-        
-        output_path = output_dir / f"{notebook_path_obj.stem}_{timestamp}.ipynb"
-        
+
+        output_path_absolute = (
+            output_base_dir / f"{notebook_path_obj.stem}_{timestamp}.ipynb"
+        ).resolve()
+
         logger.info("📓 Executing notebook: %s", notebook_path_obj)
         logger.info("⚙️  Arguments: %s", arguments)
-        logger.info("💾 Output: %s", output_path)
+        logger.info("💾 Output: %s", output_path_absolute)
         logger.info("-" * 70)
         
         try:
             # Voer notebook uit met Papermill
             pm.execute_notebook(
                 str(notebook_path_obj),
-                str(output_path),
+                str(output_path_absolute),
                 parameters=arguments or {},
                 kernel_name='python3',
                 timeout=timeout_seconds,
@@ -101,7 +108,7 @@ class NotebookRunner:
             # Fabric-compatible resultaat
             result = {
                 "status": "success",
-                "output_notebook": str(output_path),
+                "output_notebook": str(output_path_absolute),
                 "exit_value": None
             }
             
@@ -114,7 +121,7 @@ class NotebookRunner:
             error_result = {
                 "status": "failed",
                 "error": traceback.format_exc(),
-                "output_notebook": str(output_path)
+                "output_notebook": str(output_path_absolute)
             }
             return json.dumps(error_result)
 
