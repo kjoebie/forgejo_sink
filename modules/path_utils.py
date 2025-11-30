@@ -17,7 +17,6 @@ Date: 2025-11-25
 import logging
 import os
 from typing import Optional, List
-from pathlib import Path
 from pyspark.sql import SparkSession
 
 logger = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+        format="%(asctime)s [%(levelname)s] - %(message)s",
     )
 
 CLUSTER_FILES_ROOT  = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
