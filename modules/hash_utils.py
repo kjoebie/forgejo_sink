@@ -11,8 +11,8 @@ Created: 2025-11-25
 from typing import Optional, List, Set
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import (
-    sha2, concat_ws, col, coalesce, lit, when, array, concat, 
-    collect_list, explode, struct
+    sha2, concat_ws, col, coalesce, lit, when, array, concat,
+    collect_list, explode, struct, sum as spark_sum
 )
 
 
@@ -139,43 +139,59 @@ def add_row_hash_partitioned(
 def validate_hash_columns(
     df: DataFrame,
     hash_column: str = "row_hash",
-    expected_columns: Optional[List[str]] = None
+    expected_columns: Optional[List[str]] = None,
+    max_rows: Optional[int] = None,
+    cache_df: bool = False
 ) -> bool:
     """
     Validate that hash column exists and has expected properties.
-    
+
     Args:
         df: DataFrame to validate
         hash_column: Name of hash column to check
         expected_columns: List of columns that should be included in hash
-    
+        max_rows: Maximum number of rows to validate. If provided, validation
+            runs on a limited sample instead of the full DataFrame, so full
+            validation is optional.
+        cache_df: Whether to cache the DataFrame within the function before
+            running validation. Set to False if caller manages caching.
+
     Returns:
         True if validation passes
     
     Raises:
         ValueError: If validation fails
     """
-    
+
     if hash_column not in df.columns:
         raise ValueError(f"Hash column '{hash_column}' not found in DataFrame")
-    
+
+    working_df = df.cache() if cache_df else df
+    if max_rows is not None:
+        working_df = working_df.limit(max_rows)
+
     # Check hash column is string type
     hash_type = dict(df.dtypes)[hash_column]
     if hash_type != "string":
         raise ValueError(f"Hash column '{hash_column}' has type '{hash_type}', expected 'string'")
-    
+
     # Check for NULL hashes (shouldn't happen if hash is calculated correctly)
-    null_count = df.where(col(hash_column).isNull()).count()
+    null_count = (
+        working_df
+        .agg(spark_sum(col(hash_column).isNull().cast("int")).alias("null_count"))
+        .collect()[0]["null_count"]
+        or 0
+    )
     if null_count > 0:
         raise ValueError(f"Found {null_count} NULL values in hash column '{hash_column}'")
-    
+
     # Check hash length (SHA256 = 64 chars, MD5 = 32 chars)
-    first_row = df.select(hash_column).first()
-    if first_row is None:
+    first_row = working_df.select(hash_column).head(1)
+    if not first_row:
         # Kies zelf of je dit ok vindt of juist een error wilt
         raise ValueError("Cannot validate hash length: DataFrame is empty")
-    
-    sample_hash = first_row[0]   
+
+    sample_hash = first_row[0][0]
     #sample_hash = df.select(hash_column).first()[0]
     
     if sample_hash:
