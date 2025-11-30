@@ -3,6 +3,7 @@
 import logging
 import os
 from datetime import datetime
+from functools import lru_cache
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Optional
@@ -11,8 +12,12 @@ from typing import Optional
 DEFAULT_CLUSTER_FILES_ROOT = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
 
 
+@lru_cache(maxsize=1)
 def _resolve_log_directory() -> Path:
-    """Determine the log directory based on the runtime environment."""
+    """Determine the log directory based on the runtime environment.
+
+    Uses an in-memory cache to avoid repeated filesystem checks during imports.
+    """
 
     # Prefer explicit environment override
     env_override = os.getenv("NOTEBOOK_LOG_ROOT")
@@ -36,23 +41,33 @@ def configure_logging(
     max_bytes: int = 5 * 1024 * 1024,
     backup_count: int = 5,
     enable_console_logging: bool = True,
+    log_level: int = logging.INFO,
+    formatter: Optional[logging.Formatter] = None,
 ) -> Path:
     """Configure root logging with a rotating file handler.
+
+    The log directory can be overridden with the ``NOTEBOOK_LOG_ROOT`` environment
+    variable. If unset, it defaults to the Fabric lakehouse location when
+    available, then the cluster path under ``/data/lakehouse`` or a local
+    ``notebook_outputs/logs`` directory.
 
     Args:
         run_name: Optional name prefix for the log file.
         max_bytes: Maximum log file size before rotation occurs.
         backup_count: Number of rotated log files to keep.
+        enable_console_logging: Whether to log to stdout in addition to the file.
+        log_level: Logging level to apply to the root logger.
+        formatter: Optional custom formatter; defaults to timestamp/level/message.
 
     Returns:
         Path: Full path to the log file for the current run.
     """
-
-    formatter = logging.Formatter("%(asctime)s [%(levelname)s] - %(message)s")
+    formatter = formatter or logging.Formatter("%(asctime)s [%(levelname)s] - %(message)s")
 
     if getattr(configure_logging, "_configured", False):
         # Add console logging on demand if it was disabled initially
         root_logger = logging.getLogger()
+        root_logger.setLevel(log_level)
         if enable_console_logging and not _has_console_handler(root_logger):
             _add_console_handler(root_logger, formatter)
 
@@ -65,7 +80,7 @@ def configure_logging(
     log_file = log_dir / f"{run_name or 'notebook_run'}_{timestamp}.log"
 
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
+    root_logger.setLevel(log_level)
 
     _ensure_file_handler(root_logger, log_file, formatter, max_bytes, backup_count)
 
@@ -99,7 +114,9 @@ def _ensure_file_handler(
     max_bytes: int,
     backup_count: int,
 ) -> None:
-    if any(isinstance(h, RotatingFileHandler) for h in root_logger.handlers):
+    existing_handlers = [h for h in root_logger.handlers if isinstance(h, RotatingFileHandler)]
+    if existing_handlers:
+        existing_handlers[0].setFormatter(formatter)
         return
 
     file_handler = RotatingFileHandler(

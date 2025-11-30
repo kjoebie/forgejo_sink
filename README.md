@@ -79,6 +79,17 @@ spark = create_spark_session(
 )
 ```
 
+### Logging
+
+Gebruik `modules.logging_utils.configure_logging` om bestands- en consolelogging
+met rotatie in te schakelen. Het logpad kan worden overschreven met de
+omgevingvariabele `NOTEBOOK_LOG_ROOT`; standaard gebruikt de functie de Fabric
+lakehouse (`/lakehouse/default/Files/notebook_outputs/logs`), daarna de cluster
+mount (`/data/lakehouse/.../notebook_outputs/logs`) of lokaal
+`notebook_outputs/logs`. Het logniveau (`log_level`) en formatter (`formatter`)
+zijn optioneel configureerbaar en herhaalde aanroepen voegen geen dubbele
+handlers toe.
+
 ## 📁 Project Structuur
 ```
 dwh_spark_processing/
