@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 if not logging.getLogger().hasHandlers():
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+        format="%(asctime)s [%(levelname)s] - %(message)s",
     )
 
 
