@@ -4,11 +4,21 @@ Notebook Utilities Module - Mock van mssparkutils voor vanilla Spark
 Nabootst Microsoft Fabric's mssparkutils.notebook.run() functionaliteit
 met Papermill voor vanilla Spark clusters.
 """
-import papermill as pm
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
+
+import papermill as pm
+
+logger = logging.getLogger(__name__)
+
+if not logging.getLogger().hasHandlers():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    )
 
 
 class NotebookRunner:
@@ -69,10 +79,10 @@ class NotebookRunner:
         
         output_path = output_dir / f"{notebook_path_obj.stem}_{timestamp}.ipynb"
         
-        print(f"📓 Executing notebook: {notebook_path_obj}")
-        print(f"⚙️  Arguments: {arguments}")
-        print(f"💾 Output: {output_path}")
-        print("-" * 70)
+        logger.info("📓 Executing notebook: %s", notebook_path_obj)
+        logger.info("⚙️  Arguments: %s", arguments)
+        logger.info("💾 Output: %s", output_path)
+        logger.info("-" * 70)
         
         try:
             # Voer notebook uit met Papermill
@@ -85,8 +95,8 @@ class NotebookRunner:
                 progress_bar=True
             )
             
-            print("-" * 70)
-            print(f"✅ Notebook succesvol uitgevoerd!")
+            logger.info("-" * 70)
+            logger.info("✅ Notebook succesvol uitgevoerd!")
             
             # Fabric-compatible resultaat
             result = {
@@ -98,9 +108,8 @@ class NotebookRunner:
             return json.dumps(result)
             
         except pm.PapermillExecutionError as e:
-            print("-" * 70)
-            print(f"❌ Notebook executie mislukt!")
-            print(f"Error: {str(e)}")
+            logger.error("-" * 70)
+            logger.exception("❌ Notebook executie mislukt!")
             
             error_result = {
                 "status": "failed",
@@ -110,10 +119,9 @@ class NotebookRunner:
             return json.dumps(error_result)
         
         except Exception as e:
-            print("-" * 70)
-            print(f"❌ Onverwachte error!")
-            print(f"Error: {str(e)}")
-            
+            logger.error("-" * 70)
+            logger.exception("❌ Onverwachte error!")
+
             error_result = {
                 "status": "failed",
                 "error": str(e),
