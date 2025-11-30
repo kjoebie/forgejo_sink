@@ -1,0 +1,12 @@
+{
+  "source": "demo_source",
+  "base_files": "greenhouse_sources",
+  "tables": [
+    {
+      "name": "demo_table",
+      "load_mode": "snapshot",
+      "delta_schema": "bronze",
+      "delta_table": "demo_table"
+    }
+  ]
+}
