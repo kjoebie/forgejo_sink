@@ -1,4 +1,4 @@
-﻿# DWH Spark Processing
+﻿﻿# DWH Spark Processing
 
 Data Warehouse processing notebooks voor Apache Spark, compatibel met Microsoft Fabric Runtime 1.3.
 
@@ -92,6 +92,11 @@ dwh_spark_processing/
 ├── notebook_outputs/   # Uitgevoerde notebooks (gitignored)
 └── pyproject.toml     # Dependencies
 ```
+
+## ✅ Tests draaien
+
+- Snelle checks: `python -m pytest tests -m "unit or integration"`
+- Notebook-tests apart draaien: `python -m pytest tests -m notebook`
 
 ## 🔄 Workflow
 

@@ -16,4 +16,5 @@ dependencies = [
 [dependency-groups]
 dev = [
     "nbstripout>=0.8.2",
+    "pytest>=8.3.0",
 ]
