@@ -6,6 +6,7 @@ met Papermill voor vanilla Spark clusters.
 """
 import json
 import logging
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
@@ -110,21 +111,21 @@ class NotebookRunner:
         except pm.PapermillExecutionError as e:
             logger.error("-" * 70)
             logger.exception("❌ Notebook executie mislukt!")
-            
+
             error_result = {
                 "status": "failed",
-                "error": str(e),
+                "error": traceback.format_exc(),
                 "output_notebook": str(output_path)
             }
             return json.dumps(error_result)
-        
+
         except Exception as e:
             logger.error("-" * 70)
             logger.exception("❌ Onverwachte error!")
 
             error_result = {
                 "status": "failed",
-                "error": str(e),
+                "error": traceback.format_exc(),
                 "output_notebook": None
             }
             return json.dumps(error_result)
