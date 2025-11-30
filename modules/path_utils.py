@@ -14,10 +14,19 @@ Author: Albert @ QBIDS
 Date: 2025-11-25
 """
 
+import logging
 import os
 from typing import Optional, List
 from pathlib import Path
 from pyspark.sql import SparkSession
+
+logger = logging.getLogger(__name__)
+
+if not logging.getLogger().hasHandlers():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    )
 
 CLUSTER_FILES_ROOT  = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
 
@@ -34,7 +43,7 @@ def detect_environment() -> str:
     
     Examples:
         >>> env = detect_environment()
-        >>> print(f"Running in: {env}")
+        >>> logger.info(f"Running in: {env}")
         Running in: local
     """
     if os.path.exists('/lakehouse/default'):
@@ -51,7 +60,7 @@ def get_base_path() -> str:
     
     Examples:
         >>> base = get_base_path()
-        >>> print(f"Base path: {base}")
+        >>> logger.info(f"Base path: {base}")
         Base path: Files
     """
     return '/lakehouse/default/Files' if detect_environment() == 'fabric' else 'Files'
@@ -86,7 +95,7 @@ def build_parquet_dir(base_files: str,
     Examples:
         >>> path = build_parquet_dir('greenhouse_sources', 'anva_concern', 
         ...                          '20251125T060000', 'Dim_Relatie')
-        >>> print(path)
+        >>> logger.info(path)
         Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie
         
         >>> # In Fabric environment:
@@ -128,7 +137,7 @@ def build_parquet_glob(base_files: str,
     Examples:
         >>> glob = build_parquet_glob('greenhouse_sources', 'anva_concern',
         ...                           '20251125T060000', 'Dim_Relatie')
-        >>> print(glob)
+        >>> logger.info(glob)
         Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie/*.parquet
     """
     parquet_dir = build_parquet_dir(base_files, source_name, run_ts, table_name)
@@ -156,19 +165,19 @@ def build_delta_table_name(delta_schema: str,
     Examples:
         >>> # Without override
         >>> name = build_delta_table_name('bronze', 'Dim_Relatie')
-        >>> print(name)
+        >>> logger.info(name)
         bronze.Dim_Relatie
         
         >>> # With override in table_def
         >>> table_def = {'delta_table': 'custom_name'}
         >>> name = build_delta_table_name('bronze', 'Dim_Relatie', table_def)
-        >>> print(name)
+        >>> logger.info(name)
         bronze.custom_name
         
         >>> # With schema override
         >>> table_def = {'delta_schema': 'silver', 'delta_table': 'Dim_Relatie'}
         >>> name = build_delta_table_name('bronze', 'Dim_Relatie', table_def)
-        >>> print(name)
+        >>> logger.info(name)
         silver.Dim_Relatie
     """
     # Check for overrides in table_def
@@ -201,7 +210,7 @@ def build_watermark_folder(source_name: str, run_id: str) -> str:
     
     Examples:
         >>> path = build_watermark_folder('vizier', '20251125T060000')
-        >>> print(path)
+        >>> logger.info(path)
         Files/runtime/vizier/20251125T060000/
     """
     base_path = get_base_path()
@@ -220,7 +229,7 @@ def build_config_path(config_relative_path: str) -> str:
     
     Examples:
         >>> path = build_config_path('config/dag_vizier_week.json')
-        >>> print(path)
+        >>> logger.info(path)
         Files/config/dag_vizier_week.json
         
         >>> # In Fabric:
@@ -246,7 +255,7 @@ def path_exists(path: str) -> bool:
     
     Examples:
         >>> exists = path_exists('Files/config/dag_vizier_week.json')
-        >>> print(f"Config exists: {exists}")
+        >>> logger.info(f"Config exists: {exists}")
         Config exists: True
     """
     return os.path.exists(path)
@@ -267,7 +276,7 @@ def list_run_ts_folders(base_files: str, source_name: str) -> List[str]:
     
     Examples:
         >>> run_ts_list = list_run_ts_folders('greenhouse_sources', 'anva_concern')
-        >>> print(run_ts_list[:3])
+        >>> logger.info(run_ts_list[:3])
         ['20251101T060000', '20251108T060000', '20251115T060000']
     """
     base_path = get_base_path()
@@ -322,7 +331,7 @@ def extract_date_from_run_ts(run_ts: str) -> tuple:
     
     Examples:
         >>> year, month, day = extract_date_from_run_ts('20251125T060000')
-        >>> print(f"{year}-{month}-{day}")
+        >>> logger.info(f"{year}-{month}-{day}")
         2025-11-25
     """
     if not run_ts or len(run_ts) < 8:
@@ -429,17 +438,17 @@ def get_module_info() -> dict:
 
 # if __name__ == "__main__":
 #     # Self-test when run directly
-#     print("=" * 80)
-#     print("path_utils.py - Self Test")
-#     print("=" * 80)
+#     logger.info("=" * 80)
+#     logger.info("path_utils.py - Self Test")
+#     logger.info("=" * 80)
     
 #     info = get_module_info()
 #     for key, value in info.items():
-#         print(f"{key:15}: {value}")
+#         logger.info(f"{key:15}: {value}")
     
-#     print("=" * 80)
-#     print("Example Path Outputs:")
-#     print("=" * 80)
+#     logger.info("=" * 80)
+#     logger.info("Example Path Outputs:")
+#     logger.info("=" * 80)
     
 #     # Test paths
 #     test_run_ts = "20251125T060000"
@@ -447,21 +456,21 @@ def get_module_info() -> dict:
 #     test_table = "Dim_Relatie"
 #     test_base_files = "greenhouse_sources"
     
-#     print(f"\nParquet directory:")
-#     print(f"  {build_parquet_dir(test_base_files, test_source, test_run_ts, test_table, spark)}")
+#     logger.info(f"\nParquet directory:")
+#     logger.info(f"  {build_parquet_dir(test_base_files, test_source, test_run_ts, test_table, spark)}")
     
-#     print(f"\nParquet glob:")
-#     print(f"  {build_parquet_glob(test_base_files, test_source, test_run_ts, test_table, spark)}")
+#     logger.info(f"\nParquet glob:")
+#     logger.info(f"  {build_parquet_glob(test_base_files, test_source, test_run_ts, test_table, spark)}")
     
-#     print(f"\nDelta table name:")
-#     print(f"  {build_delta_table_name('bronze', test_table)}")
+#     logger.info(f"\nDelta table name:")
+#     logger.info(f"  {build_delta_table_name('bronze', test_table)}")
     
-#     print(f"\nWatermark folder:")
-#     print(f"  {build_watermark_folder(test_source, test_run_ts)}")
+#     logger.info(f"\nWatermark folder:")
+#     logger.info(f"  {build_watermark_folder(test_source, test_run_ts)}")
     
-#     print(f"\nConfig path:")
-#     print(f"  {build_config_path('config/dag_anva_concern_week.json')}")
+#     logger.info(f"\nConfig path:")
+#     logger.info(f"  {build_config_path('config/dag_anva_concern_week.json')}")
     
-#     print("\n" + "=" * 80)
-#     print("✓ Self test complete")
-#     print("=" * 80)
+#     logger.info("\n" + "=" * 80)
+#     logger.info("✓ Self test complete")
+#     logger.info("=" * 80)
