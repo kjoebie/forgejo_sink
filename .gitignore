@@ -1,4 +1,4 @@
-﻿# Python
+﻿﻿# Python
 __pycache__/
 *.py[cod]
 *.class
@@ -33,6 +33,10 @@ uv.lock
 
 # IDE
 .vscode/
+!.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/keybindings.json
 .idea/
 *.swp
 *.swo

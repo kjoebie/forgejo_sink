@@ -1,0 +1,8 @@
+[
+    {
+        "key": "ctrl+alt+t",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Run fast tests",
+        "when": "editorTextFocus"
+    }
+]

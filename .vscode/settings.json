@@ -5,6 +5,12 @@
         "modules",
         "config"
     ],
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests",
+        "-m",
+        "unit or integration"
+    ],
     "jupyter.notebookFileRoot": "${workspaceFolder}",
     "files.exclude": {
         "**/__pycache__": true,

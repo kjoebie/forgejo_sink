@@ -1,0 +1,7 @@
+{
+  "demo_table": {
+    "last_run": "2024-01-01T00:00:00Z",
+    "watermark_key": "demo",
+    "high_watermark": "2024-01-01T00:00:00Z"
+  }
+}
