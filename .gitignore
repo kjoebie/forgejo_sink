@@ -50,3 +50,6 @@ Thumbs.db
 metastore_db/
 derby.log
 spark-warehouse/
+
+#backup files
+backup/
