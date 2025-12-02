@@ -72,3 +72,23 @@ def test_resolve_files_path_switches_to_fabric_when_env_present(mock_spark_sessi
     spark = mock_spark_session({"spark.microsoft.fabric.workspaceId": "abc123"})
     result = path_utils.resolve_files_path("Files/data", spark)
     assert result == "Files/data"
+
+
+@pytest.mark.unit
+def test_build_delta_table_name_defaults_to_schema():
+    assert path_utils.build_delta_table_name("bronze", "Customers") == "bronze.Customers"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "run_ts, expected",
+    [
+        ("20251125T060000", True),
+        ("19000101T000000", True),
+        ("", False),
+        ("202501", False),
+        ("abcd", False),
+    ],
+)
+def test_validate_run_ts_format(run_ts, expected):
+    assert path_utils.validate_run_ts_format(run_ts) is expected
