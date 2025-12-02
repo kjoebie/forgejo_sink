@@ -185,8 +185,18 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
         # Onverwacht gebruik: geef het dan gewoon door
         return original
 
+    environment = detect_environment(spark)
+    if environment == "fabric":
+        # Fabric werkt met het logische Files-pad en heeft geen prefix nodig
+        return relative
+
     base_path = get_base_path(spark)
-    logger.debug("Resolving Files path '%s' using base path '%s'", relative, base_path)
+    logger.debug(
+        "Resolving Files path '%s' using base path '%s' in env '%s'",
+        relative,
+        base_path,
+        environment,
+    )
 
     if relative == "Files":
         return base_path

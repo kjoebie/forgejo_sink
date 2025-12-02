@@ -64,6 +64,15 @@ def test_resolve_files_path_passes_through_non_files():
 
 
 @pytest.mark.unit
+def test_resolve_files_path_leaves_fabric_paths(mock_spark_session, monkeypatch):
+    monkeypatch.setattr(path_utils, "detect_environment", lambda spark=None: "fabric")
+
+    result = path_utils.resolve_files_path("/Files/data", spark=mock_spark_session())
+
+    assert result == "Files/data"
+
+
+@pytest.mark.unit
 def test_build_parquet_dir_relies_on_resolver(monkeypatch):
     calls = {}
 
