@@ -101,7 +101,7 @@ def get_base_path(spark: Optional[SparkSession] = None) -> str:
 
     for candidate in cluster_candidates:
         if os.path.exists(candidate):
-            logger.info("Detected cluster Files path: %s", candidate)
+            #logger.info("Detected cluster Files path: %s", candidate)
             return candidate
 
     logger.info("Falling back to relative Files directory")
