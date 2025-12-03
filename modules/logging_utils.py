@@ -145,6 +145,119 @@ BRONZE_SUMMARY_TABLE = "logs.bronze_run_summary"
 SILVER_LOG_TABLE = "logs.silver_processing_log"
 SILVER_SUMMARY_TABLE = "logs.silver_run_summary"
 
+# Track whether log tables have been initialized
+_log_tables_initialized = False
+
+
+def ensure_log_tables(spark: SparkSession, debug: bool = False) -> None:
+    """
+    Ensure all required log tables exist. Creates them if they don't.
+
+    This function is idempotent and safe to call multiple times.
+    It creates:
+    - logs schema (if not exists)
+    - logs.bronze_processing_log (partitioned by run_date, table_name)
+    - logs.bronze_run_summary
+    - logs.silver_processing_log (partitioned by run_date)
+    - logs.silver_run_summary
+
+    Args:
+        spark: Active SparkSession
+        debug: If True, logs detailed information about table creation
+
+    Example:
+        >>> ensure_log_tables(spark, debug=True)
+        >>> # Now safe to call log_batch() and log_summary()
+    """
+    global _log_tables_initialized
+
+    # Skip if already initialized in this session
+    if _log_tables_initialized:
+        return
+
+    from modules.log_schemas import (
+        LOG_SCHEMA,
+        BRONZE_LOG_TABLE_FULLNAME,
+        BRONZE_SUMMARY_TABLE_FULLNAME,
+        SILVER_LOG_TABLE_FULLNAME,
+        SILVER_SUMMARY_TABLE_FULLNAME,
+        bronze_processing_log_schema,
+        bronze_run_summary_schema,
+        silver_processing_log_schema,
+        silver_run_summary_schema
+    )
+
+    logger = logging.getLogger(__name__)
+
+    # Create logs schema if it doesn't exist
+    try:
+        spark.sql(f"CREATE SCHEMA IF NOT EXISTS {LOG_SCHEMA}")
+        if debug:
+            logger.info(f"✓ Schema '{LOG_SCHEMA}' is ready")
+    except Exception as e:
+        logger.warning(f"Could not create schema {LOG_SCHEMA}: {e}")
+
+    # Define tables with their schemas and partitioning
+    tables_config = [
+        {
+            "name": BRONZE_LOG_TABLE_FULLNAME,
+            "schema": bronze_processing_log_schema,
+            "partition_by": ["run_date", "table_name"],
+            "description": "Bronze processing log"
+        },
+        {
+            "name": BRONZE_SUMMARY_TABLE_FULLNAME,
+            "schema": bronze_run_summary_schema,
+            "partition_by": None,
+            "description": "Bronze run summary"
+        },
+        {
+            "name": SILVER_LOG_TABLE_FULLNAME,
+            "schema": silver_processing_log_schema,
+            "partition_by": ["run_date"],
+            "description": "Silver processing log"
+        },
+        {
+            "name": SILVER_SUMMARY_TABLE_FULLNAME,
+            "schema": silver_run_summary_schema,
+            "partition_by": None,
+            "description": "Silver run summary"
+        }
+    ]
+
+    # Create each table if it doesn't exist
+    for config in tables_config:
+        table_name = config["name"]
+        schema = config["schema"]
+        partition_by = config["partition_by"]
+        description = config["description"]
+
+        try:
+            # Check if table exists
+            if spark.catalog.tableExists(table_name):
+                if debug:
+                    logger.info(f"✓ Table '{table_name}' already exists")
+                continue
+
+            # Create empty DataFrame with schema
+            empty_df = spark.createDataFrame([], schema)
+
+            # Write with partitioning if specified
+            writer = empty_df.write.format("delta").mode("overwrite")
+            if partition_by:
+                writer = writer.partitionBy(*partition_by)
+
+            writer.saveAsTable(table_name)
+
+            logger.info(f"✓ Created {description} table: {table_name}")
+
+        except Exception as e:
+            logger.error(f"✗ Failed to create table {table_name}: {e}")
+            raise
+
+    # Mark as initialized
+    _log_tables_initialized = True
+
 
 def build_run_date(run_ts: str) -> date:
     """
@@ -445,6 +558,8 @@ def log_batch(
     """
     Write many log records in a single batch append for the given layer.
 
+    Automatically ensures log tables exist before writing.
+
     Args:
         spark: Active SparkSession
         records: List of processing results to log
@@ -461,6 +576,9 @@ def log_batch(
         >>> # Silver logging
         >>> log_batch(spark, silver_results, "silver")
     """
+    # Ensure log tables exist
+    ensure_log_tables(spark)
+
     # Import schemas here to avoid circular dependency
     from modules.log_schemas import (
         bronze_processing_log_schema,
@@ -505,6 +623,8 @@ def log_summary(
     """
     Write run summary for Bronze or Silver processing.
 
+    Automatically ensures log tables exist before writing.
+
     Args:
         spark: Active SparkSession
         summary: Summary statistics dict
@@ -527,6 +647,9 @@ def log_summary(
         ... }
         >>> run_log_id = log_summary(spark, bronze_summary, "bronze")
     """
+    # Ensure log tables exist
+    ensure_log_tables(spark)
+
     # Import schemas here to avoid circular dependency
     from modules.log_schemas import (
         bronze_run_summary_schema,
