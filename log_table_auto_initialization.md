@@ -1,121 +1,121 @@
-# Automatische Log Tabel Initialisatie
+# Automatic Log Table Initialization
 
-## Probleem
+## Problem
 
-Voorheen moesten de log tabellen (`logs.bronze_processing_log`, `logs.bronze_run_summary`, etc.) handmatig aangemaakt worden voordat de notebooks konden draaien. Als een error optrad in `process_bronze_layer` voordat de log tabellen bestonden, kon de error niet gelogd worden en crashte de notebook met een misleidende "table not found" error in plaats van de echte foutmelding.
+Previously, log tables (`logs.bronze_processing_log`, `logs.bronze_run_summary`, etc.) had to be manually created before notebooks could run. If an error occurred in `process_bronze_layer` before the log tables existed, the error could not be logged and the notebook would crash with a misleading "table not found" error instead of the actual error message.
 
-## Oplossing
+## Solution
 
-Vanaf nu worden **alle log tabellen automatisch aangemaakt** wanneer `log_batch()` of `log_summary()` voor het eerst wordt aangeroepen. Dit betekent:
+From now on, **all log tables are automatically created** when `log_batch()` or `log_summary()` is called for the first time. This means:
 
-✅ **Errors worden altijd gelogd**, zelfs als de log tabellen nog niet bestaan
-✅ **Geen handmatige setup meer nodig** - tabellen worden automatisch aangemaakt
-✅ **Idempotent** - functies kunnen veilig meerdere keren aangeroepen worden
-✅ **Zero breaking changes** - bestaande code blijft gewoon werken
+✅ **Errors are always logged**, even if log tables don't exist yet
+✅ **No manual setup required** - tables are created automatically
+✅ **Idempotent** - functions can be safely called multiple times
+✅ **Zero breaking changes** - existing code continues to work
 
-## Wat is er Veranderd?
+## What Changed?
 
-### 1. Nieuwe Functie: `ensure_log_tables()`
+### 1. New Function: `ensure_log_tables()`
 
-In `modules/logging_utils.py` is een nieuwe functie toegevoegd:
+A new function has been added to `modules/logging_utils.py`:
 
 ```python
 from modules.logging_utils import ensure_log_tables
 
-# Maak alle log tabellen aan (indien nodig)
+# Create all log tables (if needed)
 ensure_log_tables(spark, debug=True)
 ```
 
 **Features:**
-- Maakt de `logs` schema aan (indien niet bestaat)
-- Maakt alle 4 log tabellen aan met correcte schemas en partitioning:
+- Creates the `logs` schema (if it doesn't exist)
+- Creates all 4 log tables with correct schemas and partitioning:
   - `logs.bronze_processing_log` (partitioned by `run_date`, `table_name`)
   - `logs.bronze_run_summary`
   - `logs.silver_processing_log` (partitioned by `run_date`)
   - `logs.silver_run_summary`
-- Idempotent: kan veilig meerdere keren aangeroepen worden
-- Gebruikt internal caching om performance overhead te minimaliseren
+- Idempotent: can be safely called multiple times
+- Uses internal caching to minimize performance overhead
 
-### 2. Automatische Initialisatie in Log Functies
+### 2. Automatic Initialization in Log Functions
 
-`log_batch()` en `log_summary()` roepen nu automatisch `ensure_log_tables()` aan:
+`log_batch()` and `log_summary()` now automatically call `ensure_log_tables()`:
 
 ```python
-# Voorheen: zou crashen als log tabellen niet bestaan
+# Previously: would crash if log tables don't exist
 log_batch(spark, bronze_results, "bronze", run_log_id="abc123")
 
-# Nu: maakt automatisch tabellen aan indien nodig
-log_batch(spark, bronze_results, "bronze", run_log_id="abc123")  # ✅ Werkt altijd!
+# Now: automatically creates tables if needed
+log_batch(spark, bronze_results, "bronze", run_log_id="abc123")  # ✅ Always works!
 ```
 
-### 3. Setup Notebook (Optioneel)
+### 3. Setup Notebook (Optional)
 
-Voor één-keer initialisatie is er nu een dedicated notebook:
+For one-time initialization, there's now a dedicated notebook:
 
 **`notebooks/01_setup_log_tables.ipynb`**
 
-Dit notebook:
-- Roept `ensure_log_tables()` aan met debug logging
-- Verifieert dat alle tabellen succesvol zijn aangemaakt
-- Toont de table schemas
-- Optioneel: test de log functies met dummy data
+This notebook:
+- Calls `ensure_log_tables()` with debug logging
+- Verifies that all tables were successfully created
+- Shows table schemas
+- Optional: tests log functions with dummy data
 
-**Let op:** Dit notebook is **optioneel** - de log tabellen worden automatisch aangemaakt bij het eerste gebruik.
+**Note:** This notebook is **optional** - log tables are automatically created on first use.
 
-## Gebruik
+## Usage
 
-### Optie 1: Automatisch (Aanbevolen)
+### Option 1: Automatic (Recommended)
 
-Doe niets! De log tabellen worden automatisch aangemaakt wanneer nodig:
+Do nothing! Log tables are automatically created when needed:
 
 ```python
 from modules.logging_utils import log_summary, log_batch
 
-# Eerste keer: maakt tabellen automatisch aan
+# First time: automatically creates tables
 run_log_id = log_summary(spark, bronze_summary, layer="bronze")
 log_batch(spark, bronze_results, layer="bronze", run_log_id=run_log_id)
 ```
 
-### Optie 2: Expliciet Setup Notebook
+### Option 2: Explicit Setup Notebook
 
-Run het setup notebook één keer om de tabellen expliciet aan te maken:
+Run the setup notebook once to explicitly create tables:
 
 ```bash
 # In Fabric
 Run notebook: notebooks/01_setup_log_tables.ipynb
 
-# In Cluster met Papermill
+# In Cluster with Papermill
 papermill notebooks/01_setup_log_tables.ipynb output.ipynb
 ```
 
-### Optie 3: Programmatisch
+### Option 3: Programmatic
 
-Roep `ensure_log_tables()` expliciet aan in je code:
+Call `ensure_log_tables()` explicitly in your code:
 
 ```python
 from modules.logging_utils import ensure_log_tables
 
-# Maak tabellen aan (indien nodig)
+# Create tables (if needed)
 ensure_log_tables(spark, debug=True)
 
-# Nu kun je log functies gebruiken
+# Now you can use log functions
 log_batch(spark, records, "bronze", run_log_id="...")
 ```
 
 ## Error Scenario Test
 
-Het originele probleem is nu opgelost:
+The original problem is now solved:
 
 ```python
-# SCENARIO: process_bronze_layer faalt, log tabellen bestaan niet
+# SCENARIO: process_bronze_layer fails, log tables don't exist
 
 try:
     result = process_bronze_table(
         spark, table_def, source, run_id, run_ts, run_date
     )
 except Exception as e:
-    # Voorheen: deze log call zou crashen met "table not found"
-    # Nu: maakt automatisch tabellen aan en logt de error ✅
+    # Previously: this log call would crash with "table not found"
+    # Now: automatically creates tables and logs the error ✅
     error_record = {
         "status": "FAILED",
         "error_message": str(e),
@@ -126,99 +126,99 @@ except Exception as e:
 
 ## Performance
 
-De auto-initialisatie heeft **minimale performance impact**:
+Auto-initialization has **minimal performance impact**:
 
-1. **Eerste call**: Check + creatie (~1-2 seconden voor alle 4 tabellen)
-2. **Volgende calls**: Gecached, geen overhead (0ms)
+1. **First call**: Check + creation (~1-2 seconds for all 4 tables)
+2. **Subsequent calls**: Cached, no overhead (0ms)
 
-De `_log_tables_initialized` flag zorgt ervoor dat `ensure_log_tables()` maar één keer per Spark sessie uitgevoerd wordt.
+The `_log_tables_initialized` flag ensures that `ensure_log_tables()` is only executed once per Spark session.
 
 ## Backwards Compatibility
 
-✅ **100% backwards compatible** - alle bestaande code blijft werken
-✅ Tabellen die al bestaan worden niet overschreven
-✅ Geen breaking changes in functie signatures
-✅ Bestaande notebooks werken zonder aanpassingen
+✅ **100% backwards compatible** - all existing code continues to work
+✅ Tables that already exist are not overwritten
+✅ No breaking changes in function signatures
+✅ Existing notebooks work without modifications
 
 ## Testing
 
-Run de unit tests om de functionaliteit te verifiëren:
+Run the unit tests to verify functionality:
 
 ```bash
 # Run log initialization tests
 pytest tests/test_log_table_initialization.py -v
 
-# Run alle tests
+# Run all tests
 pytest tests/ -v
 ```
 
-De test suite bevat:
+The test suite includes:
 - Schema creation test
 - Table creation test
 - Idempotency test
 - Partitioning verification
 - Auto-creation in log_batch() test
 - Auto-creation in log_summary() test
-- **Error logging without existing tables test** (het originele probleem scenario!)
+- **Error logging without existing tables test** (the original problem scenario!)
 
-## Bestanden Gewijzigd
+## Files Modified
 
 ### Modified
 - `modules/logging_utils.py`
-  - Toegevoegd: `ensure_log_tables()` functie (regel 152-260)
-  - Toegevoegd: `_log_tables_initialized` flag (regel 149)
-  - Gewijzigd: `log_batch()` - roept nu `ensure_log_tables()` aan (regel 580)
-  - Gewijzigd: `log_summary()` - roept nu `ensure_log_tables()` aan (regel 651)
+  - Added: `ensure_log_tables()` function (line 152-260)
+  - Added: `_log_tables_initialized` flag (line 149)
+  - Modified: `log_batch()` - now calls `ensure_log_tables()` (line 580)
+  - Modified: `log_summary()` - now calls `ensure_log_tables()` (line 651)
 
 ### Created
-- `notebooks/01_setup_log_tables.ipynb` - Setup notebook voor één-keer initialisatie
-- `tests/test_log_table_initialization.py` - Unit tests voor log table initialisatie
-- `LOG_TABLE_AUTO_INITIALIZATION.md` - Deze documentatie
+- `notebooks/01_setup_log_tables.ipynb` - Setup notebook for one-time initialization
+- `tests/test_log_table_initialization.py` - Unit tests for log table initialization
+- `LOG_TABLE_AUTO_INITIALIZATION.md` - This documentation
 
 ## Migration Guide
 
-### Voor Nieuwe Projecten
-Geen actie nodig - alles werkt automatisch!
+### For New Projects
+No action needed - everything works automatically!
 
-### Voor Bestaande Projecten
+### For Existing Projects
 
-**Optie A: Doe niets**
-De bestaande tabellen blijven werken. Auto-creatie wordt alleen gebruikt als tabellen niet bestaan.
+**Option A: Do nothing**
+Existing tables will continue to work. Auto-creation is only used if tables don't exist.
 
-**Optie B: Run setup notebook**
-Voor duidelijkheid kun je het setup notebook één keer runnen:
+**Option B: Run setup notebook**
+For clarity, you can run the setup notebook once:
 ```bash
 papermill notebooks/01_setup_log_tables.ipynb output.ipynb
 ```
 
-**Optie C: Test eerst**
-Run de unit tests om te verifiëren dat alles werkt:
+**Option C: Test first**
+Run the unit tests to verify everything works:
 ```bash
 pytest tests/test_log_table_initialization.py -v
 ```
 
-## Veelgestelde Vragen
+## FAQ
 
-**Q: Moet ik mijn bestaande notebooks aanpassen?**
-A: Nee, alle bestaande code blijft werken zonder aanpassingen.
+**Q: Do I need to modify my existing notebooks?**
+A: No, all existing code continues to work without modifications.
 
-**Q: Worden mijn bestaande log tabellen overschreven?**
-A: Nee, `ensure_log_tables()` checkt eerst of tabellen bestaan en laat ze met rust als ze al bestaan.
+**Q: Will my existing log tables be overwritten?**
+A: No, `ensure_log_tables()` checks if tables exist first and leaves them alone if they already exist.
 
-**Q: Wat als ik de tabellen handmatig wil aanmaken?**
-A: Dat kan nog steeds! Run het `01_setup_log_tables.ipynb` notebook of roep `ensure_log_tables()` expliciet aan.
+**Q: Can I still create tables manually?**
+A: Yes! Run the `01_setup_log_tables.ipynb` notebook or call `ensure_log_tables()` explicitly.
 
-**Q: Werkt dit in zowel Fabric als Cluster omgevingen?**
-A: Ja, de code werkt in beide omgevingen. Environment detectie gebeurt automatisch via `path_utils.py`.
+**Q: Does this work in both Fabric and Cluster environments?**
+A: Yes, the code works in both environments. Environment detection happens automatically via `path_utils.py`.
 
-**Q: Wat als table creatie faalt?**
-A: De functie raist een exception met een duidelijke error message. Check de logs voor details.
+**Q: What if table creation fails?**
+A: The function raises an exception with a clear error message. Check the logs for details.
 
-**Q: Hoe weet ik of de tabellen succesvol zijn aangemaakt?**
-A: Check de logs - `ensure_log_tables()` logt "✓ Created {table}" voor elke nieuwe tabel. Of run het setup notebook met `debug=True`.
+**Q: How do I know if tables were successfully created?**
+A: Check the logs - `ensure_log_tables()` logs "✓ Created {table}" for each new table. Or run the setup notebook with `debug=True`.
 
-## Conclusie
+## Conclusion
 
-Dit lost het oorspronkelijke probleem op: **Errors worden nu ALTIJD gelogd**, zelfs als de log tabellen nog niet bestaan. De notebooks crashen niet meer met misleidende "table not found" errors wanneer `process_bronze_layer` faalt.
+This solves the original problem: **Errors are now ALWAYS logged**, even if log tables don't exist yet. Notebooks no longer crash with misleading "table not found" errors when `process_bronze_layer` fails.
 
-De oplossing is backwards compatible, heeft minimale performance overhead, en vereist geen code aanpassingen in bestaande notebooks.
+The solution is backwards compatible, has minimal performance overhead, and requires no code modifications in existing notebooks.
