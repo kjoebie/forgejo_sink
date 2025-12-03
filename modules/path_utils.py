@@ -20,10 +20,10 @@ import os
 from typing import Optional
 from pyspark.sql import SparkSession
 
+from modules.constants import CLUSTER_FILES_ROOT
+
 # No module-level logging configuration - let consumers configure logging
 logger = logging.getLogger(__name__)
-
-CLUSTER_FILES_ROOT = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
 
 # ============================================================================
 # ENVIRONMENT DETECTION
