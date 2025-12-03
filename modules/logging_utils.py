@@ -1,12 +1,22 @@
-"""Logging utilities with rotating file handler support."""
+"""
+Logging utilities with rotating file handler support.
+
+Provides:
+- File and console logging configuration
+- Bronze and Silver processing log management
+- Query helpers for log retrieval and analysis
+"""
 
 import logging
 import os
-from datetime import datetime
+import json
+from datetime import datetime, date
 from functools import lru_cache
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Any
+from uuid import uuid4
+from pyspark.sql import DataFrame, SparkSession, Row, functions as F
 
 
 DEFAULT_CLUSTER_FILES_ROOT = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
@@ -124,3 +134,212 @@ def _ensure_file_handler(
     )
     file_handler.setFormatter(formatter)
     root_logger.addHandler(file_handler)
+
+
+# =============================================================================
+# Data Pipeline Logging Functions
+# =============================================================================
+
+# Table names
+BRONZE_LOG_TABLE = "logs.bronze_processing_log"
+BRONZE_SUMMARY_TABLE = "logs.bronze_run_summary"
+SILVER_LOG_TABLE = "logs.silver_processing_log"
+SILVER_SUMMARY_TABLE = "logs.silver_run_summary"
+
+
+def build_run_date(run_ts: str) -> date:
+    """
+    Convert a run_ts like '20251005T142752505' into a Python date(2025, 10, 5).
+
+    This avoids Spark date parsing issues with ANSI mode.
+
+    Args:
+        run_ts: Run timestamp in yyyymmddThhmmss format
+
+    Returns:
+        Python date object
+
+    Example:
+        >>> run_date = build_run_date("20251105T142752505")
+        >>> print(run_date)  # 2025-11-05
+    """
+    if not run_ts or len(run_ts) < 8:
+        raise ValueError(f"run_ts '{run_ts}' is not in expected yyyymmddThhmmss format")
+
+    y = int(run_ts[0:4])
+    m = int(run_ts[4:6])
+    d = int(run_ts[6:8])
+    return date(y, m, d)
+
+
+def truncate_error_message(error_msg: Optional[str], max_length: int = 1000) -> Optional[str]:
+    """
+    Truncate error messages to prevent bloating log tables.
+
+    Args:
+        error_msg: Error message to truncate
+        max_length: Maximum length (default: 1000)
+
+    Returns:
+        Truncated error message with indicator if truncated
+
+    Example:
+        >>> long_error = "Error: " + "x" * 2000
+        >>> truncated = truncate_error_message(long_error, 100)
+        >>> len(truncated) <= 120  # 100 + "... [TRUNCATED]"
+        True
+    """
+    if not error_msg:
+        return None
+
+    if len(error_msg) <= max_length:
+        return error_msg
+
+    return error_msg[:max_length] + "... [TRUNCATED]"
+
+
+def get_bronze_logs_for_run(spark: SparkSession, run_ts: str) -> DataFrame:
+    """
+    Get all Bronze processing logs for a specific run_ts.
+
+    Args:
+        spark: Active SparkSession
+        run_ts: Run timestamp
+
+    Returns:
+        DataFrame with Bronze processing logs
+
+    Example:
+        >>> logs = get_bronze_logs_for_run(spark, "20251105T142752505")
+        >>> logs.show()
+    """
+    return spark.table(BRONZE_LOG_TABLE).where(F.col("run_ts") == run_ts)
+
+
+def get_silver_logs_for_run(spark: SparkSession, run_ts: str) -> DataFrame:
+    """
+    Get all Silver processing logs for a specific run_ts.
+
+    Args:
+        spark: Active SparkSession
+        run_ts: Run timestamp
+
+    Returns:
+        DataFrame with Silver processing logs
+
+    Example:
+        >>> logs = get_silver_logs_for_run(spark, "20251105T142752505")
+        >>> logs.show()
+    """
+    return spark.table(SILVER_LOG_TABLE).where(F.col("run_ts") == run_ts)
+
+
+def get_failed_tables(spark: SparkSession, run_ts: str, layer: str = "bronze") -> List[str]:
+    """
+    Get list of failed table names for a run_ts.
+
+    Args:
+        spark: Active SparkSession
+        run_ts: Run timestamp
+        layer: "bronze" or "silver"
+
+    Returns:
+        List of table names with status='FAILED'
+
+    Example:
+        >>> failed = get_failed_tables(spark, "20251105T142752505", "bronze")
+        >>> print(f"Failed tables: {failed}")
+    """
+    table = BRONZE_LOG_TABLE if layer == "bronze" else SILVER_LOG_TABLE
+
+    failed = spark.table(table) \
+        .where(f"run_ts = '{run_ts}' AND status = 'FAILED'") \
+        .select("table_name") \
+        .distinct() \
+        .collect()
+
+    return [row.table_name for row in failed]
+
+
+def get_successful_tables(spark: SparkSession, run_ts: str, layer: str = "bronze") -> List[str]:
+    """
+    Get list of successful table names for a run_ts.
+
+    Args:
+        spark: Active SparkSession
+        run_ts: Run timestamp
+        layer: "bronze" or "silver"
+
+    Returns:
+        List of table names with status='SUCCESS'
+
+    Example:
+        >>> success = get_successful_tables(spark, "20251105T142752505", "bronze")
+        >>> print(f"Successful tables: {len(success)}")
+    """
+    table = BRONZE_LOG_TABLE if layer == "bronze" else SILVER_LOG_TABLE
+
+    success = spark.table(table) \
+        .where(f"run_ts = '{run_ts}' AND status = 'SUCCESS'") \
+        .select("table_name") \
+        .distinct() \
+        .collect()
+
+    return [row.table_name for row in success]
+
+
+def is_table_processed(spark: SparkSession, run_ts: str, table_name: str, layer: str = "bronze") -> bool:
+    """
+    Check if a specific table was successfully processed for a run_ts.
+
+    Args:
+        spark: Active SparkSession
+        run_ts: Run timestamp
+        table_name: Table name to check
+        layer: "bronze" or "silver"
+
+    Returns:
+        True if table has status='SUCCESS' for this run_ts
+
+    Example:
+        >>> if is_table_processed(spark, "20251105T142752505", "Dim_Relatie"):
+        ...     print("Table was processed successfully")
+    """
+    table = BRONZE_LOG_TABLE if layer == "bronze" else SILVER_LOG_TABLE
+
+    count = spark.table(table) \
+        .where(f"run_ts = '{run_ts}' AND table_name = '{table_name}' AND status = 'SUCCESS'") \
+        .count()
+
+    return count > 0
+
+
+def get_latest_run_summary(spark: SparkSession, source: str, layer: str = "bronze") -> Optional[Dict[str, Any]]:
+    """
+    Get the most recent run summary for a source.
+
+    Args:
+        spark: Active SparkSession
+        source: Source system name
+        layer: "bronze" or "silver"
+
+    Returns:
+        Dict with summary data, or None if no runs found
+
+    Example:
+        >>> summary = get_latest_run_summary(spark, "vizier", "bronze")
+        >>> if summary:
+        ...     print(f"Last run: {summary['run_ts']}, tables: {summary['total_tables']}")
+    """
+    table = BRONZE_SUMMARY_TABLE if layer == "bronze" else SILVER_SUMMARY_TABLE
+
+    latest = spark.table(table) \
+        .where(f"source = '{source}'") \
+        .orderBy(F.col("run_ts").desc()) \
+        .limit(1) \
+        .collect()
+
+    if not latest:
+        return None
+
+    return latest[0].asDict()
