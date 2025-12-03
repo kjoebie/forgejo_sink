@@ -343,3 +343,277 @@ def get_latest_run_summary(spark: SparkSession, source: str, layer: str = "bronz
         return None
 
     return latest[0].asDict()
+
+
+# =============================================================================
+# Batch Logging Functions
+# =============================================================================
+
+def _prepare_bronze_rows(bronze_results: List[Dict[str, Any]], run_log_id: str):
+    """
+    Prepare Bronze log records for batch insertion.
+
+    Args:
+        bronze_results: List of Bronze processing results
+        run_log_id: Run log ID for linking to summary
+
+    Returns:
+        List of tuples ready for DataFrame creation
+    """
+    rows = []
+    for r in bronze_results:
+        log_id = r.get("log_id") or f"{run_log_id}_{uuid4().hex[:8]}"
+        partition_key = r.get("partition_key") or r.get("run_ts")
+        error_msg = truncate_error_message(r.get("error_message"))
+
+        rows.append(
+            (
+                log_id,
+                run_log_id,
+                r.get("run_id"),
+                r.get("run_date"),
+                r.get("run_ts"),
+                r.get("source"),
+                r.get("table_name"),
+                partition_key,
+                r.get("load_mode"),
+                r.get("status"),
+                r.get("rows_processed"),
+                r.get("start_time"),
+                r.get("end_time"),
+                r.get("duration_seconds"),
+                error_msg,
+                r.get("parquet_path"),
+                r.get("delta_table"),
+            )
+        )
+    return rows
+
+
+def _prepare_silver_rows(records: List[Dict[str, Any]]):
+    """
+    Prepare Silver log records for batch insertion.
+
+    Args:
+        records: List of Silver processing results
+
+    Returns:
+        List of Rows ready for DataFrame creation
+    """
+    rows = []
+    for r in records:
+        run_ts = r.get("run_ts")
+        if not run_ts:
+            raise ValueError("Silver log record is missing run_ts")
+
+        run_date = r.get("run_date")
+        if run_date is None:
+            run_date = build_run_date(run_ts)
+
+        error_msg = truncate_error_message(r.get("error_message"))
+
+        rows.append(Row(
+            log_id           = r.get("log_id"),
+            run_id           = r.get("run_id"),
+            run_date         = run_date,
+            run_ts           = run_ts,
+            source           = r.get("source"),
+            table_name       = r.get("table_name"),
+            load_mode        = r.get("load_mode"),
+            status           = r.get("status"),
+            rows_inserted    = r.get("rows_inserted"),
+            rows_updated     = r.get("rows_updated"),
+            rows_deleted     = r.get("rows_deleted"),
+            rows_unchanged   = r.get("rows_unchanged"),
+            total_silver_rows= r.get("total_silver_rows"),
+            bronze_rows      = r.get("bronze_rows"),
+            bronze_table     = r.get("bronze_table"),
+            start_time       = r.get("start_time"),
+            end_time         = r.get("end_time"),
+            duration_seconds = r.get("duration_seconds"),
+            error_message    = error_msg,
+            silver_table     = r.get("silver_table"),
+        ))
+    return rows
+
+
+def log_batch(
+    spark: SparkSession,
+    records: List[Dict[str, Any]],
+    layer: str,
+    run_log_id: Optional[str] = None
+) -> None:
+    """
+    Write many log records in a single batch append for the given layer.
+
+    Args:
+        spark: Active SparkSession
+        records: List of processing results to log
+        layer: "bronze" or "silver"
+        run_log_id: Required for Bronze logging (links to summary)
+
+    Raises:
+        ValueError: If layer is invalid or run_log_id missing for Bronze
+
+    Example:
+        >>> # Bronze logging
+        >>> log_batch(spark, bronze_results, "bronze", run_log_id="abc123")
+
+        >>> # Silver logging
+        >>> log_batch(spark, silver_results, "silver")
+    """
+    # Import schemas here to avoid circular dependency
+    from modules.log_schemas import (
+        bronze_processing_log_schema,
+        silver_processing_log_schema,
+        BRONZE_LOG_TABLE_FULLNAME,
+        SILVER_LOG_TABLE_FULLNAME
+    )
+
+    if not records:
+        return
+
+    layer = layer.lower()
+    if layer == "bronze":
+        if not run_log_id:
+            raise ValueError("run_log_id is required for Bronze batch logging")
+        rows = _prepare_bronze_rows(records, run_log_id)
+        schema = bronze_processing_log_schema
+        table = BRONZE_LOG_TABLE_FULLNAME
+    elif layer == "silver":
+        rows = _prepare_silver_rows(records)
+        schema = silver_processing_log_schema
+        table = SILVER_LOG_TABLE_FULLNAME
+    else:
+        raise ValueError("layer must be 'bronze' or 'silver'")
+
+    df = spark.createDataFrame(rows, schema=schema)
+
+    (df.write
+        .format("delta")
+        .mode("append")
+        .saveAsTable(table))
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"✓ Logged {len(records)} {layer.capitalize()} records to {table}")
+
+
+def log_summary(
+    spark: SparkSession,
+    summary: Dict[str, Any],
+    layer: str
+) -> Optional[str]:
+    """
+    Write run summary for Bronze or Silver processing.
+
+    Args:
+        spark: Active SparkSession
+        summary: Summary statistics dict
+        layer: "bronze" or "silver"
+
+    Returns:
+        The Bronze run log_id for linking batch rows, or None for Silver
+
+    Raises:
+        ValueError: If layer is invalid or required fields missing
+
+    Example:
+        >>> bronze_summary = {
+        ...     "run_ts": "20251105T142752505",
+        ...     "run_date": date(2025, 11, 5),
+        ...     "source": "vizier",
+        ...     "total_tables": 50,
+        ...     "tables_success": 48,
+        ...     # ... more fields
+        ... }
+        >>> run_log_id = log_summary(spark, bronze_summary, "bronze")
+    """
+    # Import schemas here to avoid circular dependency
+    from modules.log_schemas import (
+        bronze_run_summary_schema,
+        silver_run_summary_schema,
+        BRONZE_SUMMARY_TABLE_FULLNAME,
+        SILVER_SUMMARY_TABLE_FULLNAME
+    )
+
+    layer = layer.lower()
+
+    if layer == "bronze":
+        log_id = summary.get("log_id") or uuid4().hex
+        run_ts = summary["run_ts"]
+        run_id = summary.get("run_id") or f"{run_ts}_{log_id[:8]}"
+
+        row = {
+            "log_id":               log_id,
+            "run_id":               run_id,
+            "run_date":             summary["run_date"],
+            "run_ts":               run_ts,
+            "source":               summary.get("source"),
+            "status":               summary.get("status", "SUCCESS"),
+            "run_start":            summary["run_start"],
+            "run_end":              summary["run_end"],
+            "duration_seconds":     summary.get("duration_seconds"),
+            "total_tables":         summary["total_tables"],
+            "tables_success":       summary["tables_success"],
+            "tables_empty":         summary["tables_empty"],
+            "tables_failed":        summary["tables_failed"],
+            "tables_skipped":       summary["tables_skipped"],
+            "total_rows":           summary["total_rows"],
+            "workers":              summary["workers"],
+            "sum_task_seconds":     summary.get("sum_task_seconds"),
+            "theoretical_min_sec":  summary.get("theoretical_min_sec"),
+            "actual_time_sec":      summary.get("actual_time_sec"),
+            "efficiency_pct":       summary.get("efficiency_pct"),
+            "failed_tables":        summary.get("failed_tables"),
+            "error_message":        summary.get("error_message"),
+        }
+
+        df = spark.createDataFrame([row], schema=bronze_run_summary_schema)
+        table = BRONZE_SUMMARY_TABLE_FULLNAME
+
+    elif layer == "silver":
+        run_ts = summary.get("run_ts")
+        if not run_ts:
+            raise ValueError("Summary missing run_ts")
+
+        run_date = summary.get("run_date")
+        if run_date is None:
+            run_date = build_run_date(run_ts)
+
+        failed_tables = summary.get("failed_tables", [])
+        failed_tables_json = json.dumps(failed_tables) if failed_tables else None
+
+        row = Row(
+            run_id              = summary.get("run_id"),
+            source              = summary.get("source"),
+            run_ts              = run_ts,
+            run_date            = run_date,
+            run_start           = summary.get("run_start"),
+            run_end             = summary.get("run_end"),
+            duration_seconds    = summary.get("duration_seconds"),
+            total_tables        = summary.get("total_tables"),
+            tables_success      = summary.get("tables_success"),
+            tables_failed       = summary.get("tables_failed"),
+            tables_skipped      = summary.get("tables_skipped"),
+            total_inserts       = summary.get("total_inserts"),
+            total_updates       = summary.get("total_updates"),
+            total_deletes       = summary.get("total_deletes"),
+            total_unchanged     = summary.get("total_unchanged"),
+            failed_tables       = failed_tables_json,
+        )
+
+        df = spark.createDataFrame([row], schema=silver_run_summary_schema)
+        table = SILVER_SUMMARY_TABLE_FULLNAME
+        log_id = None
+
+    else:
+        raise ValueError("layer must be 'bronze' or 'silver'")
+
+    (df.write
+        .format("delta")
+        .mode("append")
+        .saveAsTable(table))
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"✓ Logged {layer.capitalize()} summary to {table}")
+    return log_id
