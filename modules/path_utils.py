@@ -20,9 +20,7 @@ import os
 from typing import Optional
 from pyspark.sql import SparkSession
 
-from modules.logging_utils import configure_logging
-
-configure_logging(run_name="path_utils")
+# No module-level logging configuration - let consumers configure logging
 logger = logging.getLogger(__name__)
 
 CLUSTER_FILES_ROOT = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
@@ -169,9 +167,25 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
     """
     Converteer een Files-pad naar het juiste fysieke pad per omgeving.
 
-    - Fabric: laat 'Files/...' intact
+    - Fabric: map 'Files/...' naar '/lakehouse/default/Files/...'
     - Cluster: map naar de gevonden Files-root (glob of configuratie)
     - Local: gebruik relatieve 'Files' map
+
+    Args:
+        relative: Logical Files path (e.g., 'Files/greenhouse_sources/...')
+        spark: Optional SparkSession for environment detection
+
+    Returns:
+        str: Absolute physical path to the Files location
+
+    Examples:
+        >>> # In Fabric:
+        >>> resolve_files_path('Files/greenhouse_sources/anva/2025/11/25/...')
+        '/lakehouse/default/Files/greenhouse_sources/anva/2025/11/25/...'
+
+        >>> # In Cluster:
+        >>> resolve_files_path('Files/greenhouse_sources/anva/2025/11/25/...')
+        '/data/lakehouse/gh_b_avd/lh_gh_bronze/Files/greenhouse_sources/anva/2025/11/25/...'
     """
 
     original = relative
@@ -185,12 +199,10 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
         # Onverwacht gebruik: geef het dan gewoon door
         return original
 
-    environment = detect_environment(spark)
-    if environment == "fabric":
-        # Fabric werkt met het logische Files-pad en heeft geen prefix nodig
-        return relative
-
+    # Get the absolute base path for all environments (including Fabric)
     base_path = get_base_path(spark)
+
+    environment = detect_environment(spark)
     logger.debug(
         "Resolving Files path '%s' using base path '%s' in env '%s'",
         relative,
@@ -201,10 +213,12 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
     if relative == "Files":
         return base_path
 
+    # Extract suffix after 'Files'
     suffix = relative[len("Files"):]
     if suffix.startswith('/'):
         suffix = suffix[1:]
 
+    # Build absolute path
     if base_path.endswith('/'):
         return f"{base_path}{suffix}"
     return f"{base_path}/{suffix}"
