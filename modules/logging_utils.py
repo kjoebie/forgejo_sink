@@ -18,8 +18,7 @@ from typing import Optional, List, Dict, Any
 from uuid import uuid4
 from pyspark.sql import DataFrame, SparkSession, Row, functions as F
 
-
-DEFAULT_CLUSTER_FILES_ROOT = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
+from modules.constants import CLUSTER_FILES_ROOT
 
 
 @lru_cache(maxsize=1)
@@ -40,7 +39,7 @@ def _resolve_log_directory() -> Path:
 
     # Cluster (OneLake mounted under /data)
     if os.path.exists("/data/lakehouse"):
-        return Path(DEFAULT_CLUSTER_FILES_ROOT) / "notebook_outputs" / "logs"
+        return Path(CLUSTER_FILES_ROOT) / "notebook_outputs" / "logs"
 
     # Local execution
     return Path("notebook_outputs/logs")
