@@ -1,15 +1,18 @@
 """
 Notebook Utilities Module - Mock van mssparkutils voor vanilla Spark
 
-Nabootst Microsoft Fabric's mssparkutils.notebook.run() functionaliteit
-met Papermill voor vanilla Spark clusters.
+Nabootst Microsoft Fabric's mssparkutils functionaliteit voor vanilla Spark clusters:
+- notebook.run() via Papermill
+- fs.* file system operations via pathlib
 """
 import json
 import logging
+import shutil
 import traceback
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, List
 
 import papermill as pm
 
@@ -137,22 +140,243 @@ class NotebookRunner:
             return json.dumps(error_result)
 
 
+@dataclass
+class FileInfo:
+    """
+    File information object compatible with Fabric's mssparkutils.fs.ls() output.
+    """
+    name: str
+    path: str
+    size: int
+    modificationTime: int  # milliseconds since epoch
+    isDir: bool
+    isFile: bool
+
+
+class MockFileSystem:
+    """
+    Mock van mssparkutils.fs voor vanilla Spark
+    Gebruikt pathlib en path_utils voor environment-aware file operations
+    """
+
+    def __init__(self, spark=None):
+        """
+        Args:
+            spark: Optional SparkSession for path resolution
+        """
+        self.spark = spark
+
+    def _resolve_path(self, path: str) -> Path:
+        """
+        Resolve Fabric-style path to absolute local path.
+
+        Args:
+            path: Fabric-style path (e.g., "Files/config/foo.json")
+
+        Returns:
+            Path: Absolute local path
+        """
+        # Import here to avoid circular dependency
+        from modules.path_utils import resolve_files_path
+
+        resolved = resolve_files_path(path, self.spark)
+        return Path(resolved)
+
+    def put(self, path: str, content: str, overwrite: bool = False) -> None:
+        """
+        Write content to a file.
+
+        Args:
+            path: File path (Fabric-style, e.g., "Files/config/foo.json")
+            content: String content to write
+            overwrite: If True, overwrite existing file; if False, raise error if exists
+
+        Raises:
+            FileExistsError: If file exists and overwrite=False
+
+        Example:
+            mssparkutils.fs.put("Files/config/metadata.json", json_string, True)
+        """
+        file_path = self._resolve_path(path)
+
+        # Check if file exists and overwrite is False
+        if file_path.exists() and not overwrite:
+            raise FileExistsError(f"File already exists: {file_path}")
+
+        # Create parent directories if they don't exist
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write content
+        file_path.write_text(content, encoding='utf-8')
+        logger.debug(f"fs.put: Wrote {len(content)} bytes to {file_path}")
+
+    def read(self, path: str) -> str:
+        """
+        Read content from a file.
+
+        Args:
+            path: File path (Fabric-style)
+
+        Returns:
+            str: File content
+
+        Raises:
+            FileNotFoundError: If file does not exist
+
+        Example:
+            content = mssparkutils.fs.read("Files/config/metadata.json")
+        """
+        file_path = self._resolve_path(path)
+
+        if not file_path.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        if not file_path.is_file():
+            raise IsADirectoryError(f"Path is a directory, not a file: {file_path}")
+
+        content = file_path.read_text(encoding='utf-8')
+        logger.debug(f"fs.read: Read {len(content)} bytes from {file_path}")
+        return content
+
+    def mkdirs(self, path: str) -> None:
+        """
+        Create directory and all parent directories.
+
+        Args:
+            path: Directory path (Fabric-style)
+
+        Example:
+            mssparkutils.fs.mkdirs("Files/config/new_folder")
+        """
+        dir_path = self._resolve_path(path)
+        dir_path.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"fs.mkdirs: Created directory {dir_path}")
+
+    def rm(self, path: str, recurse: bool = False) -> None:
+        """
+        Remove file or directory.
+
+        Args:
+            path: Path to remove (Fabric-style)
+            recurse: If True, remove directory recursively; if False, only remove empty dirs
+
+        Raises:
+            FileNotFoundError: If path does not exist
+            OSError: If trying to remove non-empty directory without recurse=True
+
+        Example:
+            mssparkutils.fs.rm("Files/temp/old_file.json")
+            mssparkutils.fs.rm("Files/temp", recurse=True)
+        """
+        file_path = self._resolve_path(path)
+
+        if not file_path.exists():
+            raise FileNotFoundError(f"Path not found: {file_path}")
+
+        if file_path.is_file():
+            file_path.unlink()
+            logger.debug(f"fs.rm: Removed file {file_path}")
+        elif file_path.is_dir():
+            if recurse:
+                shutil.rmtree(file_path)
+                logger.debug(f"fs.rm: Removed directory recursively {file_path}")
+            else:
+                file_path.rmdir()  # Raises OSError if not empty
+                logger.debug(f"fs.rm: Removed empty directory {file_path}")
+
+    def ls(self, path: str) -> List[FileInfo]:
+        """
+        List files and directories in a path.
+
+        Args:
+            path: Directory path (Fabric-style)
+
+        Returns:
+            List[FileInfo]: List of file information objects
+
+        Raises:
+            FileNotFoundError: If path does not exist
+            NotADirectoryError: If path is not a directory
+
+        Example:
+            files = mssparkutils.fs.ls("Files/config")
+            for f in files:
+                print(f"{f.name}: {f.size} bytes")
+        """
+        dir_path = self._resolve_path(path)
+
+        if not dir_path.exists():
+            raise FileNotFoundError(f"Path not found: {dir_path}")
+
+        if not dir_path.is_dir():
+            raise NotADirectoryError(f"Path is not a directory: {dir_path}")
+
+        result = []
+        for item in dir_path.iterdir():
+            stat = item.stat()
+
+            # Convert modification time to milliseconds since epoch (Fabric format)
+            mod_time_ms = int(stat.st_mtime * 1000)
+
+            file_info = FileInfo(
+                name=item.name,
+                path=str(item),
+                size=stat.st_size if item.is_file() else 0,
+                modificationTime=mod_time_ms,
+                isDir=item.is_dir(),
+                isFile=item.is_file()
+            )
+            result.append(file_info)
+
+        logger.debug(f"fs.ls: Listed {len(result)} items in {dir_path}")
+        return result
+
+
 class MockMSSparkUtils:
     """
     Mock van mssparkutils voor Microsoft Fabric compatibility
-    
+
     Gebruik:
         from modules.notebook_utils import mssparkutils
-        
+
+        # Notebook operations
         result = mssparkutils.notebook.run(
             "my_notebook",
             timeout_seconds=3600,
             arguments={"param1": "value1"}
         )
+
+        # File system operations
+        mssparkutils.fs.put("Files/config/metadata.json", json_string, True)
+        content = mssparkutils.fs.read("Files/config/metadata.json")
+        files = mssparkutils.fs.ls("Files/config")
     """
-    def __init__(self):
+    def __init__(self, spark=None):
+        """
+        Args:
+            spark: Optional SparkSession for path resolution in fs operations
+        """
         self.notebook = NotebookRunner()
+        self.fs = MockFileSystem(spark)
 
 
-# Global instance - gebruik zoals in Fabric
+def get_mssparkutils(spark=None):
+    """
+    Factory function to get mssparkutils instance with Spark session.
+
+    Args:
+        spark: SparkSession for path resolution
+
+    Returns:
+        MockMSSparkUtils: Configured instance
+
+    Example:
+        from modules.notebook_utils import get_mssparkutils
+        mssparkutils = get_mssparkutils(spark)
+    """
+    return MockMSSparkUtils(spark)
+
+
+# Global instance - gebruik zoals in Fabric (zonder Spark context)
+# Voor gebruik met Spark, gebruik get_mssparkutils(spark)
 mssparkutils = MockMSSparkUtils()
