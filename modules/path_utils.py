@@ -68,15 +68,50 @@ def detect_environment(spark: Optional[SparkSession] = None) -> str:
     return 'local'
 
 
+def get_base_path_filesystem(spark: Optional[SparkSession] = None) -> str:
+    """
+    Get the absolute filesystem path to the Files directory.
+
+    This is used for filesystem operations (Python open(), os.path, etc.),
+    NOT for Spark operations. Always returns absolute paths.
+
+    Args:
+        spark: Optional SparkSession for environment detection
+
+    Returns:
+        str: Absolute path to Files directory
+    """
+    if detect_environment(spark) == 'fabric' or os.path.exists("/lakehouse/default/Files"):
+        return "/lakehouse/default/Files"
+
+    cluster_candidates = []
+    if os.path.exists(CLUSTER_FILES_ROOT):
+        cluster_candidates.append(CLUSTER_FILES_ROOT)
+
+    if os.path.exists('/data/lakehouse'):
+        matches = sorted(glob.glob('/data/lakehouse/**/Files', recursive=True))
+        cluster_candidates.extend(matches)
+
+    for candidate in cluster_candidates:
+        if os.path.exists(candidate):
+            return candidate
+
+    # Fallback to relative (for local dev)
+    return 'Files'
+
+
 def get_base_path(spark: Optional[SparkSession] = None) -> str:
     """
-    Bepaal het Files-basispad voor zowel Fabric als cluster.
+    Bepaal het Files-basispad voor Spark operaties.
 
     Detectievolgorde:
     1) Fabric: Spark-config of het bestaan van `/lakehouse/default/Files`
        -> Retourneer 'Files' (relatief pad voor Spark API)
     2) Cluster: eerst de vaste `CLUSTER_FILES_ROOT`, daarna glob op `/data/lakehouse/**/Files`
     3) Fallback: relatieve `Files` map (bijv. in de repo)
+
+    IMPORTANT: This returns paths suitable for Spark operations (spark.read, etc).
+    For filesystem operations (open(), os.path), use get_base_path_filesystem() instead.
 
     Args:
         spark: Optionele SparkSession voor Fabric-detectie.
@@ -88,7 +123,7 @@ def get_base_path(spark: Optional[SparkSession] = None) -> str:
         # In Fabric, Spark expects relative paths starting with 'Files/'
         # NOT absolute paths like /lakehouse/default/Files
         base_path = "Files"
-        logger.info("Detected Fabric environment - using relative path: %s", base_path)
+        logger.info("Detected Fabric environment - using relative Spark path: %s", base_path)
         return base_path
 
     cluster_candidates = []

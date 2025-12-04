@@ -53,6 +53,14 @@ def test_get_base_path_falls_back_to_relative(monkeypatch):
 
 
 @pytest.mark.unit
+def test_get_base_path_filesystem_returns_absolute_in_fabric(mock_spark_session, monkeypatch):
+    monkeypatch.setattr(os.path, "exists", lambda p: False)
+    spark = mock_spark_session({"spark.microsoft.fabric.workspaceId": "abc123"})
+    # Filesystem operations need absolute path even in Fabric
+    assert path_utils.get_base_path_filesystem(spark) == "/lakehouse/default/Files"
+
+
+@pytest.mark.unit
 def test_resolve_files_path_maps_using_detected_base(monkeypatch):
     monkeypatch.setattr(path_utils, "get_base_path", lambda spark=None: "/data/lakehouse/custom/Files")
     resolved = path_utils.resolve_files_path("Files/data/table")

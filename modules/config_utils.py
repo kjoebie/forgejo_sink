@@ -22,7 +22,7 @@ def load_dag(dag_path: str, base_path: Optional[str] = None) -> Dict[str, Any]:
 
     Args:
         dag_path: Path to DAG JSON file (relative or absolute)
-        base_path: Base path for Files directory (optional)
+        base_path: Base path for Files directory (optional, can be relative "Files" or absolute)
 
     Returns:
         Dict with DAG configuration
@@ -33,6 +33,11 @@ def load_dag(dag_path: str, base_path: Optional[str] = None) -> Dict[str, Any]:
     """
     # Handle both absolute and relative paths
     if base_path and not os.path.isabs(dag_path):
+        # If base_path is relative (like "Files" in Fabric), convert to absolute filesystem path
+        if base_path == "Files" and os.path.exists("/lakehouse/default/Files"):
+            # Fabric environment - use absolute filesystem path
+            base_path = "/lakehouse/default/Files"
+
         if not dag_path.startswith(base_path):
             dag_path = f"{base_path}/{dag_path}"
 
