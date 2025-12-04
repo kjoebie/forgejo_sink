@@ -22,7 +22,8 @@ def test_detect_environment_without_spark_defaults_to_local(mock_spark_session, 
 def test_get_base_path_prefers_fabric_when_detected(mock_spark_session, monkeypatch):
     monkeypatch.setattr(os.path, "exists", lambda p: False)
     spark = mock_spark_session({"spark.microsoft.fabric.workspaceId": "abc123"})
-    assert path_utils.get_base_path(spark) == "/lakehouse/default/Files"
+    # Fabric should return relative path 'Files' for Spark API compatibility
+    assert path_utils.get_base_path(spark) == "Files"
 
 
 @pytest.mark.unit

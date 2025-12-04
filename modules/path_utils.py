@@ -74,6 +74,7 @@ def get_base_path(spark: Optional[SparkSession] = None) -> str:
 
     Detectievolgorde:
     1) Fabric: Spark-config of het bestaan van `/lakehouse/default/Files`
+       -> Retourneer 'Files' (relatief pad voor Spark API)
     2) Cluster: eerst de vaste `CLUSTER_FILES_ROOT`, daarna glob op `/data/lakehouse/**/Files`
     3) Fallback: relatieve `Files` map (bijv. in de repo)
 
@@ -84,8 +85,10 @@ def get_base_path(spark: Optional[SparkSession] = None) -> str:
         str: Pad naar de Files-root, afgestemd op de omgeving.
     """
     if detect_environment(spark) == 'fabric' or os.path.exists("/lakehouse/default/Files"):
-        base_path = "/lakehouse/default/Files"
-        logger.info("Detected Fabric Files path: %s", base_path)
+        # In Fabric, Spark expects relative paths starting with 'Files/'
+        # NOT absolute paths like /lakehouse/default/Files
+        base_path = "Files"
+        logger.info("Detected Fabric environment - using relative path: %s", base_path)
         return base_path
 
     cluster_candidates = []
@@ -134,13 +137,14 @@ def build_parquet_dir(base_files: str,
         ValueError: If run_ts format is invalid (< 8 characters)
     
     Examples:
-        >>> path = build_parquet_dir('greenhouse_sources', 'anva_concern', 
+        >>> # In Fabric (relative path):
+        >>> path = build_parquet_dir('greenhouse_sources', 'anva_concern',
         ...                          '20251125T060000', 'Dim_Relatie')
         >>> logger.info(path)
         Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie
-        
-        >>> # In Fabric environment:
-        >>> # /lakehouse/default/Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie
+
+        >>> # In Cluster (absolute path):
+        >>> # /data/lakehouse/gh_b_avd/lh_gh_bronze/Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie
     """
     if not run_ts or len(run_ts) < 8:
         raise ValueError(f"run_ts '{run_ts}' is not in expected yyyymmddThhmmss format")
@@ -167,7 +171,7 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
     """
     Converteer een Files-pad naar het juiste fysieke pad per omgeving.
 
-    - Fabric: map 'Files/...' naar '/lakehouse/default/Files/...'
+    - Fabric: behoud relatief pad 'Files/...' (Spark API verwacht dit)
     - Cluster: map naar de gevonden Files-root (glob of configuratie)
     - Local: gebruik relatieve 'Files' map
 
@@ -176,14 +180,14 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
         spark: Optional SparkSession for environment detection
 
     Returns:
-        str: Absolute physical path to the Files location
+        str: Environment-specific path for Spark to use
 
     Examples:
-        >>> # In Fabric:
+        >>> # In Fabric (relative path for Spark):
         >>> resolve_files_path('Files/greenhouse_sources/anva/2025/11/25/...')
-        '/lakehouse/default/Files/greenhouse_sources/anva/2025/11/25/...'
+        'Files/greenhouse_sources/anva/2025/11/25/...'
 
-        >>> # In Cluster:
+        >>> # In Cluster (absolute path):
         >>> resolve_files_path('Files/greenhouse_sources/anva/2025/11/25/...')
         '/data/lakehouse/gh_b_avd/lh_gh_bronze/Files/greenhouse_sources/anva/2025/11/25/...'
     """
