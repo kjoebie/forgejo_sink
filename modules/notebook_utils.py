@@ -332,6 +332,117 @@ class MockFileSystem:
         return result
 
 
+@dataclass
+class RuntimeContext:
+    """
+    Mock of mssparkutils.runtime.context for Fabric compatibility.
+
+    Provides essential runtime context information similar to Fabric notebooks.
+    Only includes fields that are available in cluster/local environments.
+    """
+    productType: str = "Spark"  # "Fabric" in real Fabric, "Spark" in cluster
+    currentWorkspaceName: str = "local_workspace"
+    defaultLakehouseName: str = "local_lakehouse"
+    defaultLakehouseWorkspaceName: str = "local_workspace"
+    currentNotebookName: Optional[str] = None
+    currentWorkspaceId: Optional[str] = None
+    defaultLakehouseId: Optional[str] = None
+    defaultLakehouseWorkspaceId: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary format similar to Fabric output."""
+        return {
+            'productType': self.productType,
+            'currentWorkspaceName': self.currentWorkspaceName,
+            'defaultLakehouseName': self.defaultLakehouseName,
+            'defaultLakehouseWorkspaceName': self.defaultLakehouseWorkspaceName,
+            'currentNotebookName': self.currentNotebookName,
+            'currentWorkspaceId': self.currentWorkspaceId,
+            'defaultLakehouseId': self.defaultLakehouseId,
+            'defaultLakehouseWorkspaceId': self.defaultLakehouseWorkspaceId,
+        }
+
+
+class MockRuntime:
+    """
+    Mock of mssparkutils.runtime for Fabric compatibility.
+    """
+    def __init__(self, spark=None):
+        """
+        Args:
+            spark: Optional SparkSession for environment detection
+        """
+        self.spark = spark
+        self._context = None
+
+    @property
+    def context(self) -> RuntimeContext:
+        """
+        Get runtime context information.
+
+        Returns:
+            RuntimeContext: Context information object
+
+        Example:
+            >>> from modules.notebook_utils import get_mssparkutils
+            >>> mssparkutils = get_mssparkutils(spark)
+            >>> context = mssparkutils.runtime.context
+            >>> print(context.productType)
+            Spark
+            >>> print(context.to_dict())
+            {'productType': 'Spark', 'currentWorkspaceName': 'local_workspace', ...}
+        """
+        if self._context is None:
+            self._context = self._detect_context()
+        return self._context
+
+    def _detect_context(self) -> RuntimeContext:
+        """
+        Detect runtime context based on environment.
+
+        Returns:
+            RuntimeContext: Detected context information
+        """
+        # Import here to avoid circular dependency
+        from modules.path_utils import detect_environment
+        from modules.constants import CLUSTER_FILES_ROOT
+
+        env = detect_environment(self.spark)
+
+        if env == 'fabric':
+            # In real Fabric, this would be populated by Fabric itself
+            # For mock, we return minimal Fabric-like context
+            return RuntimeContext(
+                productType="Fabric",
+                currentWorkspaceName="fabric_workspace",
+                defaultLakehouseName="fabric_lakehouse",
+                defaultLakehouseWorkspaceName="fabric_workspace"
+            )
+        else:
+            # Cluster/local environment
+            # Try to extract lakehouse name from CLUSTER_FILES_ROOT
+            workspace_name = "local_workspace"
+            lakehouse_name = "local_lakehouse"
+
+            if CLUSTER_FILES_ROOT and '/lakehouse/' in CLUSTER_FILES_ROOT:
+                # Parse path like: /data/lakehouse/gh_b_avd/lh_gh_bronze/Files
+                parts = CLUSTER_FILES_ROOT.split('/')
+                try:
+                    lakehouse_idx = parts.index('lakehouse')
+                    if lakehouse_idx + 2 < len(parts):
+                        workspace_name = parts[lakehouse_idx + 1]  # gh_b_avd
+                        lakehouse_name = parts[lakehouse_idx + 2]  # lh_gh_bronze
+                except (ValueError, IndexError):
+                    pass
+
+            return RuntimeContext(
+                productType="Spark",
+                currentWorkspaceName=workspace_name,
+                defaultLakehouseName=lakehouse_name,
+                defaultLakehouseWorkspaceName=workspace_name
+            )
+
+
 class MockMSSparkUtils:
     """
     Mock van mssparkutils voor Microsoft Fabric compatibility
@@ -350,6 +461,12 @@ class MockMSSparkUtils:
         mssparkutils.fs.put("Files/config/metadata.json", json_string, True)
         content = mssparkutils.fs.read("Files/config/metadata.json")
         files = mssparkutils.fs.ls("Files/config")
+
+        # Runtime context
+        context = mssparkutils.runtime.context
+        print(f"Running in: {context.productType}")
+        print(f"Workspace: {context.currentWorkspaceName}")
+        print(f"Lakehouse: {context.defaultLakehouseName}")
     """
     def __init__(self, spark=None):
         """
@@ -358,6 +475,7 @@ class MockMSSparkUtils:
         """
         self.notebook = NotebookRunner()
         self.fs = MockFileSystem(spark)
+        self.runtime = MockRuntime(spark)
 
 
 def get_mssparkutils(spark=None):

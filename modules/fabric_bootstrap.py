@@ -57,15 +57,34 @@ def _get_workspace_info() -> Optional[dict]:
         dict: Workspace context information, or None if not available
     """
     try:
+        # Try real Fabric notebookutils first
         from notebookutils import mssparkutils
         context = mssparkutils.runtime.context
-        return {
-            'workspace_name': getattr(context, 'workspaceName', None),
-            'workspace_id': getattr(context, 'workspaceId', None),
-            'lakehouse_name': getattr(context, 'lakehouseName', None),
-            'notebook_name': getattr(context, 'notebookName', None),
-        }
-    except (ImportError, AttributeError) as e:
+
+        # Fabric context is a dict-like object
+        if hasattr(context, 'to_dict'):
+            ctx_dict = context.to_dict()
+        else:
+            # Real Fabric context
+            ctx_dict = {
+                'workspace_name': getattr(context, 'currentWorkspaceName', None),
+                'workspace_id': getattr(context, 'currentWorkspaceId', None),
+                'lakehouse_name': getattr(context, 'defaultLakehouseName', None),
+                'notebook_name': getattr(context, 'currentNotebookName', None),
+            }
+
+        return ctx_dict
+    except ImportError:
+        # Not in Fabric, try mock version
+        try:
+            from modules.notebook_utils import get_mssparkutils
+            mock_utils = get_mssparkutils()
+            context = mock_utils.runtime.context
+            return context.to_dict()
+        except Exception as e:
+            logger.debug(f"Could not get workspace info from mock: {e}")
+            return None
+    except AttributeError as e:
         logger.debug(f"Could not get workspace info: {e}")
         return None
 
