@@ -1,0 +1,6 @@
+[
+  {"Bron": "anva_concern", "schema_name": "pbi", "obj_name": "Fact_PremieFacturen", "partition_column": "Boek_Datum", "granularity": "month", "lookback_months": 12},
+  {"Bron": "geintegreerd_model", "schema_name": "pbi", "obj_name": "Fact_PremieFacturen", "partition_column": "Boek_Datum", "granularity": "month", "lookback_months": 12},
+  {"Bron": "anva_meeus", "schema_name": "pbi", "obj_name": "Fact_PremieFacturen", "partition_column": "Boek_Datum", "granularity": "month", "lookback_months": 12},
+  {"Bron": "ccs_level", "schema_name": "pbi", "obj_name": "Fact_PremieBoekingen", "partition_column": "Boek_Datum", "granularity": "month", "lookback_months": 12}
+]

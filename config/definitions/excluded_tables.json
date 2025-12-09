@@ -1,0 +1,4 @@
+[
+  {"Bron": "vizier", "schema_name": "dbo", "obj_name": "BO_sleutels_Wim_Verheijen", "excluded": 1},
+  {"Bron": "vizier", "schema_name": "dbo", "obj_name": "UMG_Historie", "excluded": 1}
+]

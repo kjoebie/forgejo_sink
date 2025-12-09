@@ -1,0 +1,23 @@
+[
+    {"Bron": "anva_concern",        "schema_name": "pbi", "obj_name": "Fact_PremieFacturen",    "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
+    {"Bron": "ccs_level",           "schema_name": "pbi", "obj_name": "Fact_PremieBoekingen",   "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
+    {"Bron": "geintegreerd_model",  "schema_name": "pbi", "obj_name": "Fact_PremieFacturen",    "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
+    {"Bron": "anva_meeus",          "schema_name": "pbi", "obj_name": "Fact_PremieFacturen",    "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Relaties",               "load_mode": "incremental", "filter_column": "Updatedatum", "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Contactpersonen",        "load_mode": "incremental", "filter_column": "Upd_dt",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Sleutels",               "load_mode": "incremental", "filter_column": "upd",         "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Polissen",               "load_mode": "incremental", "filter_column": "upd_dt",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Schades",                "load_mode": "incremental", "filter_column": "upd_dt",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "DnB",                    "load_mode": "incremental", "filter_column": "upd_dt",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Contactmomenten",        "load_mode": "incremental", "filter_column": "Upd",         "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Taken",                  "load_mode": "incremental", "filter_column": "upd",         "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Sales",                  "load_mode": "incremental", "filter_column": "UPD_DT",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Retenties",              "load_mode": "incremental", "filter_column": "UPD_DT",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Adresbeeld",             "load_mode": "incremental", "filter_column": "UPD_DT",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "UBO_Onderzoeken",        "load_mode": "incremental", "filter_column": "UPD_DT",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Producten",              "load_mode": "incremental", "filter_column": "upd",         "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Medewerkers",            "load_mode": "incremental", "filter_column": "id_upd",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Klachten",               "load_mode": "incremental", "filter_column": "upd_dt",      "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Verkoopkansen",          "load_mode": "incremental", "filter_column": "upd",         "kind": "stamp17"},
+    {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Interesses",             "load_mode": "incremental", "filter_column": "UPD_DT",      "kind": "stamp17"}
+]

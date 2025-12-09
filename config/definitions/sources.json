@@ -1,0 +1,8 @@
+[
+  {"Bron": "ccs_level", "Server": "vmdwhidpweu01", "Database": "InsuranceData_CCS_DWH"},
+  {"Bron": "anva_meeus", "Server": "vmdwhidpweu01\\MEEUS", "Database": "InsuranceData_ANVA_DWH"},
+  {"Bron": "vizier", "Server": "viz-sql01-mi-p.1d57ac4f4d63.database.windows.net", "Database": "CRM_DWH"},
+  {"Bron": "ods_reports", "Server": "vmdwhodsanvpweu", "Database": "OG_ODS_Reports"},
+  {"Bron": "anva_concern", "Server": "vmdwhidpweu01", "Database": "InsuranceData_ANVA_DWH"},
+  {"Bron": "insurance_data_im", "Server": "vmdwhidpweu01", "Database": "InsuranceData_OpGroen_DWH"}
+]
