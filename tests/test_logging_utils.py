@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from modules import logging_utils
+from modules.constants import CLUSTER_FILES_ROOT
 
 
 @pytest.fixture(autouse=True)
@@ -38,7 +39,7 @@ def test_resolve_log_directory_prefers_env_override(monkeypatch, tmp_path):
     "fabric_exists, data_exists, expected_suffix",
     [
         (True, False, Path("/lakehouse/default/Files/notebook_outputs/logs")),
-        (False, True, Path(logging_utils.DEFAULT_CLUSTER_FILES_ROOT) / "notebook_outputs" / "logs"),
+        (False, True, Path(CLUSTER_FILES_ROOT) / "notebook_outputs" / "logs"),
         (False, False, Path("notebook_outputs/logs")),
     ],
 )

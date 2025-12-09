@@ -16,9 +16,10 @@ Example usage:
     )
 """
 
-import logging
-from typing import Optional, Dict, Any
+import logging, os, sys, shutil, tempfile
+from typing import Optional, Dict
 from pyspark.sql import SparkSession
+
 
 logger = logging.getLogger(__name__)
 
@@ -90,20 +91,82 @@ def get_or_create_spark_session(
         builder = builder.enableHiveSupport()
         logger.info("  - Hive support enabled")
 
+    ###
+    ## Additional builder configurations can be added here if needed
+    ###
+    try:
+        import mssparkutils  # type: ignore
+        
+    except ImportError:
+        # === LOCAL / CLUSTER ENVIRONMENT ===
+        logger.info("  - Detection: Local/Cluster environment detected")
+
+        # A. Python Interpreter (Jouw specifieke VENV)
+        # Dit pad moet exact kloppen op zowel de Driver (notebook) als de Worker nodes.
+        # Omdat je 'local cluster' (192.168.x.x) waarschijnlijk op dezelfde machine/mount draait, werkt dit.
+        forced_python = "/home/sparkadmin/source/repos/dwh_spark_processing/.venv/bin/python"
+        
+        if os.path.exists(forced_python):
+            logger.info(f"  - Python VENV gevonden: {forced_python}")
+            os.environ["PYSPARK_PYTHON"] = forced_python
+            os.environ["PYSPARK_DRIVER_PYTHON"] = forced_python
+        else:
+            logger.warning(f"  - ! VENV pad niet gevonden: {forced_python}. Fallback naar sys.executable.")
+            os.environ["PYSPARK_PYTHON"] = sys.executable
+            os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
+
+        # B. Code Distributie (De Oplossing voor ModuleNotFoundError)
+        # In plaats van PYTHONPATH te hacken, zippen we de modules en geven die mee aan Spark.
+        project_root = _find_project_root()
+        modules_path = os.path.join(project_root, "modules")
+        
+        if os.path.exists(modules_path):
+            # Maak een tijdelijke zip van de modules map
+            # We maken de zip zodanig dat 'modules' de root folder in de zip is.
+            zip_filename = _create_modules_zip(project_root)
+            logger.info(f"  - Modules gezipt voor distributie: {zip_filename}")
+            
+            # Voeg toe aan pyFiles. Spark distribueert dit naar alle workers en voegt toe aan hun pad.
+            builder.config("spark.submit.pyFiles", zip_filename)
+        else:
+            logger.warning(f"  - ! Kan 'modules' map niet vinden in {project_root}")
+
     spark = builder.getOrCreate()
-
-    logger.info("✓ Spark session created")
-
- 
-    # Apply standard configurations
     _apply_standard_configs(spark, additional_configs)
-
-    # Log session info
     _log_spark_info(spark)
 
     return spark
 
- 
+
+def _find_project_root() -> str:
+    """Probeert slim de root van de repo te vinden."""
+    cwd = os.getcwd()
+    # Check of we in 'notebooks' zitten, zo ja, ga eentje omhoog
+    if os.path.basename(cwd) in ['notebooks', 'config', 'modules']:
+        return os.path.dirname(cwd)
+    # Check of modules map hier staat
+    if os.path.exists(os.path.join(cwd, "modules")):
+        return cwd
+    # Fallback naar jouw hardcoded pad
+    return "/home/sparkadmin/source/repos/dwh_spark_processing"
+
+def _create_modules_zip(project_root: str) -> str:
+    """Zipt de modules folder naar een temp file."""
+    # We gebruiken temp dir zodat we geen rommel achterlaten in je repo
+    temp_dir = tempfile.gettempdir()
+    zip_base_name = os.path.join(temp_dir, "dwh_modules_package")
+    
+    # shutil.make_archive maakt automatisch .zip extensie eraan vast
+    # root_dir=project_root, base_dir='modules' zorgt dat de zip intern start met 'modules/...'
+    # Dit is cruciaal voor 'from modules import ...'
+    zip_path = shutil.make_archive(
+        base_name=zip_base_name, 
+        format='zip', 
+        root_dir=project_root, 
+        base_dir='modules'
+    )
+    return zip_path
+
 def _apply_standard_configs(
 
     spark: SparkSession,
@@ -139,13 +202,11 @@ def _apply_standard_configs(
     # Apply standard configs
     for key, value in standard_configs.items():
         spark.conf.set(key, value)
-
     logger.debug("  - Standard Parquet configurations applied")
 
 
     # Apply additional configs if provided
     if additional_configs:
-
         for key, value in additional_configs.items():
             spark.conf.set(key, value)
             logger.debug(f"  - Custom config: {key} = {value}")
@@ -171,7 +232,6 @@ def _log_spark_info(spark: SparkSession) -> None:
         logger.info(f"  Application name: {spark.sparkContext.appName}")
 
     except Exception as e:
-
         logger.warning(f"  Could not retrieve some Spark info: {e}")
 
 

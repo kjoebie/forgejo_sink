@@ -20,12 +20,10 @@ import os
 from typing import Optional
 from pyspark.sql import SparkSession
 
-from modules.logging_utils import configure_logging
+from modules.constants import CLUSTER_FILES_ROOT
 
-configure_logging(run_name="path_utils")
+# No module-level logging configuration - let consumers configure logging
 logger = logging.getLogger(__name__)
-
-CLUSTER_FILES_ROOT = "/data/lakehouse/gh_b_avd/lh_gh_bronze/Files"
 
 # ============================================================================
 # ENVIRONMENT DETECTION
@@ -70,14 +68,50 @@ def detect_environment(spark: Optional[SparkSession] = None) -> str:
     return 'local'
 
 
+def get_base_path_filesystem(spark: Optional[SparkSession] = None) -> str:
+    """
+    Get the absolute filesystem path to the Files directory.
+
+    This is used for filesystem operations (Python open(), os.path, etc.),
+    NOT for Spark operations. Always returns absolute paths.
+
+    Args:
+        spark: Optional SparkSession for environment detection
+
+    Returns:
+        str: Absolute path to Files directory
+    """
+    if detect_environment(spark) == 'fabric' or os.path.exists("/lakehouse/default/Files"):
+        return "/lakehouse/default/Files"
+
+    cluster_candidates = []
+    if os.path.exists(CLUSTER_FILES_ROOT):
+        cluster_candidates.append(CLUSTER_FILES_ROOT)
+
+    if os.path.exists('/data/lakehouse'):
+        matches = sorted(glob.glob('/data/lakehouse/**/Files', recursive=True))
+        cluster_candidates.extend(matches)
+
+    for candidate in cluster_candidates:
+        if os.path.exists(candidate):
+            return candidate
+
+    # Fallback to relative (for local dev)
+    return 'Files'
+
+
 def get_base_path(spark: Optional[SparkSession] = None) -> str:
     """
-    Bepaal het Files-basispad voor zowel Fabric als cluster.
+    Bepaal het Files-basispad voor Spark operaties.
 
     Detectievolgorde:
     1) Fabric: Spark-config of het bestaan van `/lakehouse/default/Files`
+       -> Retourneer 'Files' (relatief pad voor Spark API)
     2) Cluster: eerst de vaste `CLUSTER_FILES_ROOT`, daarna glob op `/data/lakehouse/**/Files`
     3) Fallback: relatieve `Files` map (bijv. in de repo)
+
+    IMPORTANT: This returns paths suitable for Spark operations (spark.read, etc).
+    For filesystem operations (open(), os.path), use get_base_path_filesystem() instead.
 
     Args:
         spark: Optionele SparkSession voor Fabric-detectie.
@@ -86,8 +120,10 @@ def get_base_path(spark: Optional[SparkSession] = None) -> str:
         str: Pad naar de Files-root, afgestemd op de omgeving.
     """
     if detect_environment(spark) == 'fabric' or os.path.exists("/lakehouse/default/Files"):
-        base_path = "/lakehouse/default/Files"
-        logger.info("Detected Fabric Files path: %s", base_path)
+        # In Fabric, Spark expects relative paths starting with 'Files/'
+        # NOT absolute paths like /lakehouse/default/Files
+        base_path = "Files"
+        logger.info("Detected Fabric environment - using relative Spark path: %s", base_path)
         return base_path
 
     cluster_candidates = []
@@ -136,13 +172,14 @@ def build_parquet_dir(base_files: str,
         ValueError: If run_ts format is invalid (< 8 characters)
     
     Examples:
-        >>> path = build_parquet_dir('greenhouse_sources', 'anva_concern', 
+        >>> # In Fabric (relative path):
+        >>> path = build_parquet_dir('greenhouse_sources', 'anva_concern',
         ...                          '20251125T060000', 'Dim_Relatie')
         >>> logger.info(path)
         Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie
-        
-        >>> # In Fabric environment:
-        >>> # /lakehouse/default/Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie
+
+        >>> # In Cluster (absolute path):
+        >>> # /data/lakehouse/gh_b_avd/lh_gh_bronze/Files/greenhouse_sources/anva_concern/2025/11/25/20251125T060000/Dim_Relatie
     """
     if not run_ts or len(run_ts) < 8:
         raise ValueError(f"run_ts '{run_ts}' is not in expected yyyymmddThhmmss format")
@@ -169,9 +206,25 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
     """
     Converteer een Files-pad naar het juiste fysieke pad per omgeving.
 
-    - Fabric: laat 'Files/...' intact
+    - Fabric: behoud relatief pad 'Files/...' (Spark API verwacht dit)
     - Cluster: map naar de gevonden Files-root (glob of configuratie)
     - Local: gebruik relatieve 'Files' map
+
+    Args:
+        relative: Logical Files path (e.g., 'Files/greenhouse_sources/...')
+        spark: Optional SparkSession for environment detection
+
+    Returns:
+        str: Environment-specific path for Spark to use
+
+    Examples:
+        >>> # In Fabric (relative path for Spark):
+        >>> resolve_files_path('Files/greenhouse_sources/anva/2025/11/25/...')
+        'Files/greenhouse_sources/anva/2025/11/25/...'
+
+        >>> # In Cluster (absolute path):
+        >>> resolve_files_path('Files/greenhouse_sources/anva/2025/11/25/...')
+        '/data/lakehouse/gh_b_avd/lh_gh_bronze/Files/greenhouse_sources/anva/2025/11/25/...'
     """
 
     original = relative
@@ -185,12 +238,10 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
         # Onverwacht gebruik: geef het dan gewoon door
         return original
 
-    environment = detect_environment(spark)
-    if environment == "fabric":
-        # Fabric werkt met het logische Files-pad en heeft geen prefix nodig
-        return relative
-
+    # Get the absolute base path for all environments (including Fabric)
     base_path = get_base_path(spark)
+
+    environment = detect_environment(spark)
     logger.debug(
         "Resolving Files path '%s' using base path '%s' in env '%s'",
         relative,
@@ -201,10 +252,12 @@ def resolve_files_path(relative: str, spark: Optional[SparkSession] = None) -> s
     if relative == "Files":
         return base_path
 
+    # Extract suffix after 'Files'
     suffix = relative[len("Files"):]
     if suffix.startswith('/'):
         suffix = suffix[1:]
 
+    # Build absolute path
     if base_path.endswith('/'):
         return f"{base_path}{suffix}"
     return f"{base_path}/{suffix}"
