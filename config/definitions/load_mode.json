@@ -1,7 +1,7 @@
 [
     {"Bron": "anva_concern",        "schema_name": "pbi", "obj_name": "Fact_PremieFacturen",    "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
     {"Bron": "ccs_level",           "schema_name": "pbi", "obj_name": "Fact_PremieBoekingen",   "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
-    {"Bron": "geintegreerd_model",  "schema_name": "pbi", "obj_name": "Fact_PremieFacturen",    "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
+    {"Bron": "insurance_data_im",  "schema_name": "pbi", "obj_name": "Fact_PremieFacturen",    "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
     {"Bron": "anva_meeus",          "schema_name": "pbi", "obj_name": "Fact_PremieFacturen",    "load_mode": "window",      "filter_column": "Boek_Datum",  "kind": "datetime"},
     {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Relaties",               "load_mode": "incremental", "filter_column": "Updatedatum", "kind": "stamp17"},
     {"Bron": "vizier",              "schema_name": "dbo", "obj_name": "Contactpersonen",        "load_mode": "incremental", "filter_column": "Upd_dt",      "kind": "stamp17"},

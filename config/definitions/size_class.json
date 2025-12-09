@@ -1,6 +1,6 @@
 [
   {"Bron": "anva_concern", "schema_name": "pbi", "obj_name": "Fact_PremieFacturen", "size_class": "L"},
   {"Bron": "ccs_level", "schema_name": "pbi", "obj_name": "Fact_PremieBoekingen", "size_class": "L"},
-  {"Bron": "geintegreerd_model", "schema_name": "pbi", "obj_name": "Fact_PremieFacturen", "size_class": "L"},
+  {"Bron": "insurance_data_im", "schema_name": "pbi", "obj_name": "Fact_PremieFacturen", "size_class": "L"},
   {"Bron": "anva_meeus", "schema_name": "pbi", "obj_name": "Fact_PremieFacturen", "size_class": "L"}
 ]
